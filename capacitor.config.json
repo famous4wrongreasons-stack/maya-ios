@@ -1,0 +1,32 @@
+{
+  "appId": "pro.malesthetic.app",
+  "appName": "Мужская Эстетика",
+  "webDir": "www",
+  "server": {
+    "hostname": "malesthetic.pro",
+    "iosScheme": "https",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#000000",
+    "scrollEnabled": true
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "SplashScreen": {
+      "launchShowDuration": 700,
+      "backgroundColor": "#000000",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#000000"
+    },
+    "Keyboard": {
+      "resize": "native"
+    }
+  }
+}

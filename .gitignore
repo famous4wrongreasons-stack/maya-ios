@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Capacitor / native generated noise
+ios/App/App/public/cordova.js
+ios/App/App/public/cordova_plugins.js
+ios/App/App/public/plugins/
+ios/App/build/
+ios/DerivedData/
+
+# Xcode user/local state
+*.xcuserstate
+xcuserdata/
+DerivedData/
+
+# Env / secrets
+.env
+.env.*
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+*.key
+*.pem
+
+# Build artifacts
+dist/
+build/
+out/
+*.ipa
+*.xcarchive
+
+# Local tool state
+.claude/
+.cursor/
+.vscode/
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
