@@ -28,6 +28,7 @@ Instructions for the Capacitor iOS wrapper of MAYA / Мужская Эстети
 - Tail path from Figma iMessage reference: `M10.0206 12.9416C9.78651 11.7287 9.66391 10.4761 9.66391 9.19488V0.402926H29.3165V28.8475C24.5575 28.8475 20.1936 27.1559 16.7932 24.3413C13.4008 26.6012 7.96114 28.7495 1.38911 27.5546C3.19922 26.7788 10.1811 22.1243 9.92249 12.8151C9.95387 12.8583 9.9866 12.9004 10.0206 12.9416Z`.
 - Tail SVG viewBox: `0 0 29.7195 29.2504`, mirrored for outgoing bubbles.
 - Keep `fillRule: 'evenodd'` and `clipRule: 'evenodd'` on the tail path to avoid artifacts near the tail join.
+- Keep the tail slightly under the bubble body: current production sizing is `width: 21`, `height: 20.7`, offset `left/right: -6`.
 - Compact sizing: `minHeight: 35`, `borderRadius: 18.5`, `padding: 7px 15px 8px`.
 - Message font stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`.
 
