@@ -22,15 +22,12 @@ Instructions for the Capacitor iOS wrapper of MAYA / Мужская Эстети
 ## Current Staff Chat Bubble
 
 - Uses `MessageBubble({ side, children, tight })` inside `ATeamChat()`.
-- Background is inline SVG path from reference, not CSS triangle/pseudo-element tail.
-- Incoming fill: `#E5E5E5`.
-- Outgoing fill: `#DCF8C6`.
-- SVG viewBox: `0 0 132 40`.
-- Right bubble mirrors path with `translate(132 0) scale(-1 1)`.
-- Compact sizing: `minHeight: 40`.
-- Padding:
-  - right: `9px 30px 10px 26px`
-  - left: `9px 26px 10px 30px`
+- Bubble body is a compact rounded rect; only the lower-corner tail is SVG.
+- Incoming fill: `#e9e9eb`.
+- Outgoing fill: `#34c759`, text white.
+- Tail path: `M0.6 0C2.8 7.8 9.2 13.2 21.4 14.5C15.1 18.8 6.3 18.3 2 11.4C0.3 8.5-0.3 3.7 0.6 0Z`.
+- Tail SVG viewBox: `0 0 22 18`, mirrored for incoming bubbles.
+- Compact sizing: `minHeight: 35`, `borderRadius: 18.5`, `padding: 7px 15px 8px`.
 - Message font stack: `-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif`.
 
 ## Build / Install
@@ -50,4 +47,3 @@ xcrun devicectl device process launch --device FF6F8003-99D2-5AED-A4CA-05BAE3877
 - Do not commit `build/DerivedData`.
 - Verify inline JS syntax before build.
 - Avoid changing Capacitor/native settings unless the task requires it.
-
