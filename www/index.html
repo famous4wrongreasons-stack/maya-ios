@@ -494,6 +494,42 @@ window.__ME_MAYA_OS_API_BASE = window.__ME_MAYA_OS_API_BASE || ('http://' + meLo
 // This private branch is installed only on the owner's device. Public builds
 // omit the flag and keep the MAYA OS entry behind the "Скоро" gate.
 window.__ME_MAYA_OS_PREVIEW = true;
+
+// Owner-only recovery: an onboarding tenant used to become the permanent
+// launch context. Restore the legacy app once without deleting saved MAYA OS
+// sessions, so the owner can switch back to a test business later.
+(function recoverOwnerDefaultWorkspace() {
+  if (window.__ME_MAYA_OS_PREVIEW !== true) return;
+  var recoveryKey = 'me_owner_default_workspace_v1';
+  try {
+    if (localStorage.getItem(recoveryKey)) return;
+    localStorage.setItem(recoveryKey, String(Date.now()));
+    localStorage.removeItem('me_booking_backend');
+    localStorage.removeItem('me_booking_api_base');
+    localStorage.removeItem('me_booking_tenant_slug');
+
+    var params = new URLSearchParams(location.search);
+    params.delete('booking_backend');
+    params.delete('booking_api_base');
+    params.delete('booking_tenant');
+    params.delete('onboarded');
+    params.delete('calendar_setup');
+    history.replaceState(
+      null,
+      '',
+      location.pathname + (params.toString() ? '?' + params.toString() : '') + location.hash
+    );
+  } catch (e) {}
+})();
+
+window.__meReturnToLegacyWorkspace = function () {
+  try {
+    localStorage.removeItem('me_booking_backend');
+    localStorage.removeItem('me_booking_api_base');
+    localStorage.removeItem('me_booking_tenant_slug');
+  } catch (e) {}
+  location.replace(location.pathname + '?booking_backend=legacy');
+};
 </script>
 <script>
 /* ═══ SaaS safe-mode (P2): white-label boot из нового бэкенда ═══
