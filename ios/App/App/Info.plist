@@ -37,6 +37,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tg</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен, чтобы вы могли голосом общаться с ассистентом MAYA и записывать голосовые сообщения в чате.</string>
 	<key>NSCameraUsageDescription</key>
