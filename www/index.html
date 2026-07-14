@@ -495,6 +495,24 @@ window.__ME_MAYA_OS_API_BASE = window.__ME_MAYA_OS_API_BASE || ('http://' + meLo
 // omit the flag and keep the MAYA OS entry behind the "Скоро" gate.
 window.__ME_MAYA_OS_PREVIEW = true;
 
+// Бизнес-onboarding — отдельный анонимный flow. Обычная авторизация клиента
+// никогда не должна наследовать его незавершённый activation token.
+window.__ME_BUSINESS_ONBOARDING_KEY = 'me_onb_v1';
+window.__meReadBusinessOnboarding = function () {
+  try {
+    var raw = sessionStorage.getItem(window.__ME_BUSINESS_ONBOARDING_KEY);
+    var state = raw ? JSON.parse(raw) : null;
+    if (!state || state.flow !== 'maya_os_trial' || !state.activationToken) return null;
+    return state;
+  } catch (e) {
+    return null;
+  }
+};
+window.__meClearBusinessOnboarding = function () {
+  try { sessionStorage.removeItem(window.__ME_BUSINESS_ONBOARDING_KEY); } catch (e) {}
+  try { window.__meOnb = null; } catch (e) {}
+};
+
 // Owner-only recovery: an onboarding tenant used to become the permanent
 // launch context. Restore the legacy app once without deleting saved MAYA OS
 // sessions, so the owner can switch back to a test business later.
@@ -4508,10 +4526,10 @@ function ALogin() {
   };
   // запуск разговорного онбординга в каноничном чате AChat (не отдельный визард)
   const lgLaunchOnb = (api, activationToken) => {
-    var ctx = { apiBase: String(api).replace(/\/+$/, ''), activationToken: activationToken };
+    var ctx = { flow: 'maya_os_trial', apiBase: String(api).replace(/\/+$/, ''), activationToken: activationToken };
     window.__meOnb = ctx; // память flow (не localStorage/URL)
     // session-scoped: пережить reload/recovery, тем же activation
-    try { sessionStorage.setItem('me_onb_v1', JSON.stringify({ apiBase: ctx.apiBase, activationToken: activationToken, stage: 'chat' })); } catch (e) {}
+    try { sessionStorage.setItem('me_onb_v1', JSON.stringify({ flow: 'maya_os_trial', apiBase: ctx.apiBase, activationToken: activationToken, stage: 'chat' })); } catch (e) {}
     if (window.__meMode) window.__meMode('client');
     if (window.__meGo) window.__meGo('chat'); else location.reload();
   };
@@ -4912,6 +4930,7 @@ function ALogin() {
   const lgEmailGo = async () => {
     var v = (lgEmail || '').trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { setLgEmailErr('Проверьте адрес — например, name@mail.ru'); return; }
+    try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (e) {}
     var tenant = lgEmailTenant();
     if (lgEmailReqRef.current) return;
     lgEmailReqRef.current = true; setLgEmailBusy(true); setLgEmailErr(''); setLgNote('');
@@ -4964,6 +4983,7 @@ function ALogin() {
       var resolvedTenant = d && d.tenant && d.tenant.slug ? d.tenant : (tenant ? { slug: tenant, id: d.user && (d.user.tenant_id || d.user.tenantId) } : null);
       if (!resolvedTenant || !resolvedTenant.slug) throw Object.assign(new Error('verify'), { code: 'email_login_invalid' });
       var saved = lgSaveBundle(Object.assign({}, d, { tenant: resolvedTenant }), api);
+      try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (e) {}
       setLgEmailDebug('');
       setLgEmailBusinesses([]);
       // роль строго из ответа сервера (email не выдумывает роль); владельца ведём в кабинет, клиента — на клиентский путь
@@ -10964,8 +10984,8 @@ function AChat() {
 	  // ── MAYA OS: разговорный онбординг владельца в этом же чате MAYA (не отдельный визард) ──
 	  const ONB_SS = 'me_onb_v1';
 	  const ONB_GREETING = 'Здравствуйте! Я Майя, помогу настроить ваш бизнес. Вы работаете на себя или у вас бизнес?';
-	  function onbReadSS() { try { return JSON.parse(sessionStorage.getItem(ONB_SS) || 'null'); } catch (e) { return null; } }
-	  function onbActiveNow() { try { if (window.__meOnb && window.__meOnb.activationToken) return true; var s = onbReadSS(); return !!(s && s.activationToken); } catch (e) { return false; } }
+	  function onbReadSS() { try { return window.__meReadBusinessOnboarding ? window.__meReadBusinessOnboarding() : null; } catch (e) { return null; } }
+	  function onbActiveNow() { try { if (window.__meOnb && window.__meOnb.flow === 'maya_os_trial' && window.__meOnb.activationToken) return true; var s = onbReadSS(); return !!(s && s.activationToken); } catch (e) { return false; } }
 	  const [msgs, setMsgs] = React.useState(function () { return onbActiveNow() ? [{ role: 'bot', text: ONB_GREETING }] : readCachedChatMsgs(); });
 	  const onbOnRef = React.useRef(onbActiveNow()); // заморожено на маунт; онбординг завершается редиректом в новый бизнес
 	  const [onbStage, setOnbStage] = React.useState('chat'); // chat|confirm|logo|crm
@@ -28061,7 +28081,7 @@ function ChooseVersion() {
 function MEApp() {
   const [screen, setScreen] = React.useState(function () {
     // reload во время онбординга: остаёмся в чате настройки (AChat восстановит черновик из session-scoped storage)
-    try { var o = JSON.parse(sessionStorage.getItem('me_onb_v1') || 'null'); if (o && o.activationToken) return 'chat'; } catch (e) {}
+    try { var o = window.__meReadBusinessOnboarding && window.__meReadBusinessOnboarding(); if (o) return 'chat'; } catch (e) {}
     return 'login';
   });
   const [, force] = React.useReducer(function (x) {
@@ -28205,7 +28225,7 @@ function MEApp() {
       if (s === 'cutmatch' && !window.__meIsFounder) s = 'home';
       // Чат с MAYA — только залогиненным (не гостям). Гостя уводим на экран входа.
       // Исключение: активный онбординг MAYA OS (владелец ещё без сессии) — чат настройки разрешён.
-      var onbGo = (function () { try { if (window.__meOnb && window.__meOnb.activationToken) return true; var o = JSON.parse(sessionStorage.getItem('me_onb_v1') || 'null'); return !!(o && o.activationToken); } catch (e) { return false; } })();
+      var onbGo = (function () { try { if (window.__meOnb && window.__meOnb.flow === 'maya_os_trial' && window.__meOnb.activationToken) return true; return !!(window.__meReadBusinessOnboarding && window.__meReadBusinessOnboarding()); } catch (e) { return false; } })();
       if (s === 'chat' && !onbGo && window.__ME_SAAS_CTX && window.__meFeatureReady && !window.__meFeatureReady('ai_chatbot', { universal: true })) s = 'home';
       if (s === 'chat' && !onbGo && !(window.__meHasSession && window.__meHasSession())) {
         try { window.__meChatGuestBlocked = true; } catch (e) {}
@@ -28235,6 +28255,7 @@ function MEApp() {
     };
     window.__meLogout = function () {
       try { if (window.__meSyncAppIcon) window.__meSyncAppIcon(false); } catch (eIc) {}
+      try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (eOnb) {}
       try {
         localStorage.removeItem('web_session_token');
         localStorage.removeItem('tg_auth_data');
@@ -29675,6 +29696,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   // ── 1. VK ID — переход на id.vk.com (PKCE), возврат на /app/ ловим ниже ──
   window.loginVk = async function(){
     try {
+      if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding();
       var verifier=randStr(64), state=(__meIsNative() ? 'n_' : 'w_') + randStr(30);
       __meVkStoreSet('vk_code_verifier',verifier);
       __meVkStoreSet('vk_state',state);
@@ -29713,6 +29735,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
       var d=await resp.json();
       if(d&&d.token){
         try{
+          if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding();
           localStorage.setItem('web_session_token',d.token);
           localStorage.removeItem('tg_guest_mode');
           window.__meFreshLogin=true;
@@ -29746,6 +29769,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   }
   window.loginYandex = async function(){
     try {
+      if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding();
       var state=(__meIsNative() ? 'yn_' : 'yw_') + randStr(30);
       __meYaStoreSet('yandex_state',state);
       var resp=await fetch(PROXY+'?action=yandex_start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:state,redirect_uri:YANDEX_REDIRECT})});
@@ -29778,6 +29802,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
       var d=await resp.json();
       if(d&&d.token){
         try{
+          if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding();
           localStorage.setItem('web_session_token',d.token);
           localStorage.removeItem('tg_guest_mode');
           window.__meFreshLogin=true;
@@ -29948,6 +29973,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     __meSaveAppLoginNonce(null);
   }
   function __meResetLocalLoginState(){
+    try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(e0){}
     try{
       localStorage.removeItem('web_session_token');
       localStorage.removeItem('tg_auth_data');
@@ -29971,6 +29997,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   }
   function __meCompleteAppLogin(token){
     __meStopAppLogin();
+    try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(e0){}
     try{ localStorage.setItem('web_session_token',token); localStorage.removeItem('tg_guest_mode'); }catch(e){}
     try{ __meClearIdentityCache(); }catch(e){}
     if(window.__meRefresh) try{ window.__meRefresh(); }catch(e){}
@@ -30128,6 +30155,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
   function meAuthRoute(){
     __meDropForeignLogin();
     if(!(hasSession() && window.__meGo)) { __meSyncAppIcon(false); return false; }
+    try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(e0){}
     __meSyncAppIcon(true);
     // Свежий вход (только что залогинились) → клиента ведём сразу в «Личный кабинет»,
     // а не на главную. Флаг ставит success-ветка applogin-поллинга; потребляем один раз.
@@ -30136,7 +30164,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     // Клиента после логина ведём сразу в клиентскую версию. Кэш роли -> мгновенный роутинг без мелькания логина.
     var cached=null; try{ cached=localStorage.getItem('me_is_staff'); }catch(e){}
     if(cached==='1'){ window.__meGo('choose'); }
-    else if(cached==='0'){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }
+    else if(cached==='0'){ if(window.__meMode)window.__meMode('client'); window.__meGo(freshLogin?'cabinet':'home'); }
     try{
       var rq = window.__meAuthReq ? window.__meAuthReq({}) : null;
       if(!rq){ if(cached===null){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }; return true; }
@@ -30159,7 +30187,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
             try{ localStorage.setItem('me_is_staff', staff?'1':'0'); }catch(e2){}
             try{ window.__panelInfo=me; window.__meRole=me.role||null; window.__meIsMaster=!!me.is_master; window.__meIsFounder=!!me.is_founder; window.__meStaffName=((me.role==='owner'||me.role==='manager'||me.role==='master'||me.is_master)?(me.master_name||me.name||null):null); /* staff avatar fallback: salon photo by staff_id when Telegram login gave no photo */ if(!window.__meAvatar && me.staff_id && window.__meMasterPhoto){ var _mp=window.__meMasterPhoto(me.staff_id); if(_mp) window.__meAvatar=_mp; } /* реальное фото из Telegram: тянем с бэка по ЛЮБОЙ tg-сессии, не только staff. */ if(me) __meRefreshTelegramAvatar(rq); window.__meIsStaff=staff; if(window.__meRefresh)window.__meRefresh(); }catch(e3){}
             var want = staff?'1':'0';
-            if(want!==cached){ if(staff){ window.__meGo('choose'); } else { if(window.__meMode)window.__meMode('client'); window.__meGo(freshLogin?'cabinet':'home'); } }
+            if(freshLogin || want!==cached){ if(staff){ window.__meGo('choose'); } else { if(window.__meMode)window.__meMode('client'); window.__meGo(freshLogin?'cabinet':'home'); } }
           })
           .catch(function(){ if(_roleAttempt < 3){ setTimeout(_tryRole, 1500*_roleAttempt); return; } if(cached===null){ if(window.__meMode)window.__meMode('client'); window.__meGo('home'); }; });
       };
@@ -30168,7 +30196,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     return true;
   }
   window.__meHasSession = hasSession;
-  window.__meLogout = function(){ try{ __meSyncAppIcon(false); }catch(e0){} try{ localStorage.removeItem('web_session_token'); localStorage.removeItem('tg_auth_data'); localStorage.removeItem('tg_guest_mode'); }catch(e){} try{ __meClearIdentityCache(); }catch(e2){} if(window.__meGo) window.__meGo('login'); };
+  window.__meLogout = function(){ try{ __meSyncAppIcon(false); }catch(e0){} try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(eOnb){} try{ localStorage.removeItem('web_session_token'); localStorage.removeItem('tg_auth_data'); localStorage.removeItem('tg_guest_mode'); }catch(e){} try{ __meClearIdentityCache(); }catch(e2){} if(window.__meGo) window.__meGo('login'); };
 
   // ── 4. На старте: сперва ловим возврат VK (?code), затем — если есть сессия, минуем логин ──
   async function boot(){
