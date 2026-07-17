@@ -486,11 +486,29 @@ window.APP_DATA = {
 </script>
 <script>
 // Personal debug build: shared MAYA login reaches the isolated local RC backend.
-// Production distribution must replace this with the HTTPS MAYA OS API origin.
-var meLocalMayaOsHost = (location.hostname === '127.0.0.1' || location.hostname === 'localhost')
-  ? '127.0.0.1'
-  : 'MacBook-Pro-2.local';
-window.__ME_MAYA_OS_API_BASE = window.__ME_MAYA_OS_API_BASE || ('http://' + meLocalMayaOsHost + ':3105/api');
+// Production distribution must replace these LAN candidates with one HTTPS origin.
+window.__ME_MAYA_OS_API_CANDIDATES = [
+  'http://MacBook-Pro-2.local:3105/api',
+  'http://192.168.0.138:3105/api'
+];
+window.__ME_MAYA_OS_API_BASE = window.__ME_MAYA_OS_API_BASE || window.__ME_MAYA_OS_API_CANDIDATES[0];
+window.__meResolveMayaOsApi = async function () {
+  var candidates = [window.__ME_MAYA_OS_API_BASE].concat(window.__ME_MAYA_OS_API_CANDIDATES || []);
+  var checked = {};
+  for (var i = 0; i < candidates.length; i++) {
+    var api = String(candidates[i] || '').replace(/\/+$/, '');
+    if (!api || checked[api]) continue;
+    checked[api] = true;
+    try {
+      var response = await fetch(api + '/health/ready', { method: 'GET', cache: 'no-store' });
+      if (response.ok) {
+        window.__ME_MAYA_OS_API_BASE = api;
+        return api;
+      }
+    } catch (e) {}
+  }
+  throw new Error('Нет связи с тестовым сервером MAYA OS. Подключите iPhone и Mac к одной Wi-Fi сети и попробуйте снова.');
+};
 // This private branch is installed only on the owner's device. Public builds
 // omit the flag and keep the MAYA OS entry behind the "Скоро" gate.
 window.__ME_MAYA_OS_PREVIEW = true;
@@ -4565,6 +4583,7 @@ function ALogin() {
     lgTrialReq.current = true; setLgTrialBusy(true); setLgTrialErr('');
     var api = lgApiBase();
     try {
+      if (typeof window.__meResolveMayaOsApi === 'function') api = await window.__meResolveMayaOsApi();
       var r = await fetch(api + '/onboarding/trial-activations', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'maya_os' })
       });
