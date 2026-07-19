@@ -14385,7 +14385,9 @@ function AChat() {
         ['Сводка за день', function () { send('Сводка за день'); }],
         ['Записать клиента', function () { window.__meGo && window.__meGo('schedule'); }],
         ['Запустить рассылку', function () { send('Запустить рассылку'); }]
-      ] : QUICKS.slice(0, 3).map(function (q) { return [q, function () { quickTap(q); }]; });
+      ] : (window.__ME_SAAS_CTX
+        ? ['Записаться', 'Мои записи', 'Баллы', 'Магазин', 'Профиль'].map(function (q) { return [q, function () { send(q); }]; })
+        : QUICKS.slice(0, 3).map(function (q) { return [q, function () { quickTap(q); }]; }));
       return e('div', {
         style: { minHeight: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '10px 8px' }
       }, e(SeedLogoAnimated, { size: 110, color: t.ink }),
