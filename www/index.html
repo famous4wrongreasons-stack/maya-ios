@@ -8168,6 +8168,7 @@ function ABookFlow() {
         return localBookingFetch(path, Object.assign({}, ini, { headers: Object.assign({}, ini.headers, { Authorization: 'Bearer ' + s.token }) }));
       });
     };
+    try { if (window.__meLoadEffectiveFeatures) window.__meLoadEffectiveFeatures(); } catch (e) {}
   }, []);
   // Fail-closed на старте: под ключом текущего tenant лежит «сырой» bundle, но
   // saasReadSession его НЕ принимает (чужой tenant / битый контекст / подделка) —
@@ -8438,6 +8439,7 @@ function ABookFlow() {
     saasWriteSession(s);
     var back = saasReadSession();
     if (!back || back.token !== s.token || back.refresh_token !== s.refresh_token) return null;
+    setTimeout(function () { try { if (window.__meLoadEffectiveFeatures) window.__meLoadEffectiveFeatures(); } catch (e) {} }, 0);
     return s;
   }
   // обновление только профиля: пара токенов не трогается
@@ -8805,7 +8807,7 @@ function ABookFlow() {
       if (!res || !res.access_token || !res.refresh_token) throw new Error('Пустой ответ авторизации');
       if (!saasSaveBundle(res, null)) throw new Error('Не удалось сохранить вход — попробуйте ещё раз.');
       // P0-3: успешный вход клиента = выход из stale business-onboarding этой вкладки
-      try { sessionStorage.removeItem('me_onb_v1'); window.__meOnb = null; } catch (eOnb) {}
+      try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (eOnb) {}
       setSaasUser(res.user || null);
       authReqRef.current = false;
       setAuthBusy(false);
@@ -11929,14 +11931,16 @@ function ANotifyCard(props) {
   var e = React.createElement; var c = meWidgetTheme(props.t || {}, !!props.dark);
   var PROXY = 'https://malesthetic.pro/app/api-proxy.php';
   var st = React.useState({ prefs: null, loading: true }); var s = st[0], setS = st[1];
-  function req(body, cb) { var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null; if (!rq) { cb && cb(null); return; } fetch(PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body }).then(function (r) { return r.json(); }).then(function (res) { cb && cb((res && res.prefs) || {}); }).catch(function () { cb && cb(null); }); }
-  React.useEffect(function () { req({}, function (p) { setS({ prefs: p || {}, loading: false }); }); }, []);
+  var unavailable = !meIsLegacy();
+  function req(body, cb) { if (unavailable) { cb && cb(null); return; } var rq = window.__meAuthReq ? window.__meAuthReq(body || {}) : null; if (!rq) { cb && cb(null); return; } fetch(PROXY + '?action=notify_prefs', { method: 'POST', headers: rq.headers, body: rq.body }).then(function (r) { return r.json(); }).then(function (res) { cb && cb((res && res.prefs) || {}); }).catch(function () { cb && cb(null); }); }
+  React.useEffect(function () { if (unavailable) { setS({ prefs: null, loading: false }); return; } req({}, function (p) { setS({ prefs: p || {}, loading: false }); }); }, []);
   function on(k) { return !!(s.prefs && s.prefs[k] !== false); }
   function toggle(k) { var n = Object.assign({}, s.prefs || {}); n[k] = !on(k); setS({ prefs: n, loading: false }); try { window.tactile && window.tactile(); } catch (er) {} req({ prefs: n }, function (p) { if (p) setS({ prefs: p, loading: false }); }); }
   var ROWS = [['reminder', 'Напоминания о записи'], ['record_changes', 'Изменения записи'], ['freed_slot', 'Освободилось время'], ['marketing', 'Акции и новости']];
   var wrap = { border: '1px solid ' + c.line, borderRadius: 20, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, marginBottom: 4 };
   function Sw(isOn, click) { return e('div', { onClick: click, style: { width: 44, height: 26, borderRadius: 999, flex: '0 0 auto', cursor: 'pointer', background: isOn ? c.invBg : c.line2, position: 'relative', transition: 'background .2s' } }, e('div', { style: { position: 'absolute', top: 3, left: isOn ? 21 : 3, width: 20, height: 20, borderRadius: 999, background: c.invText, transition: 'left .2s' } })); }
+  if (unavailable) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5 } }, 'Настройки уведомлений этого бизнеса пока недоступны в чате.'));
   if (s.loading) return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'), e('div', { style: { fontSize: 12.5, color: c.muted, padding: '6px 2px' } }, 'Секунду…'));
   return e('div', { style: wrap }, e('div', { style: lab }, 'Уведомления'),
     ROWS.map(function (r, i) { return e('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 2px', borderTop: i ? '1px solid ' + c.line : 'none' } }, e('span', { style: { flex: 1, fontSize: 13.5, color: c.ink } }, r[1]), Sw(on(r[0]), function () { toggle(r[0]); })); }));
@@ -11968,6 +11972,7 @@ function ATipsCard(props) {
   var wrap = { border: '1px solid ' + c.line, borderRadius: 22, padding: 16, marginTop: 10, maxWidth: 420, background: c.surf };
   var lab = { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted, margin: '15px 0 11px' };
   var prim = { width: '100%', height: 48, marginTop: 18, borderRadius: 999, border: 0, background: c.invBg, color: c.invText, fontFamily: c.BODYF, fontSize: 10.5, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500, cursor: 'pointer' };
+  if (!meIsLegacy()) return e('div', { style: wrap }, e('div', { style: { fontFamily: c.DISPF, fontSize: 9, letterSpacing: '0.26em', textTransform: 'uppercase', color: c.muted } }, 'Чаевые'), e('div', { style: { fontSize: 13, color: c.muted, lineHeight: 1.5, marginTop: 10 } }, 'Чаевые для этого бизнеса пока не подключены.'));
   if (s.sent) {
     return e('div', { style: wrap }, e('div', { style: { textAlign: 'center', padding: '6px 4px' } },
       e('div', { style: { width: 54, height: 54, borderRadius: '50%', background: c.invBg, color: c.invText, display: 'grid', placeItems: 'center', margin: '0 auto', fontSize: 26 } }, '✓'),
