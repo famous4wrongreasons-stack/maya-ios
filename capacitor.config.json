@@ -27,7 +27,7 @@
       "overlaysWebView": true
     },
     "Keyboard": {
-      "resize": "native",
+      "resize": "none",
       "autoBackdropColor": "dom"
     }
   }
