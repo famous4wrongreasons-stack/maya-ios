@@ -43,6 +43,8 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен, чтобы вы могли голосом общаться с ассистентом MAYA и записывать голосовые сообщения в чате.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>NFC нужен владельцу бизнеса, чтобы записать ссылку клиентского приложения MAYA на метку.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
