@@ -13398,6 +13398,19 @@ function AChat() {
     }
     return e('div', { key: 'aiapproval', style: { border: '1px solid ' + line, borderRadius: 14, padding: '12px 14px', marginTop: m.text ? 10 : 0, maxWidth: 420 } }, kids);
   }
+  function saasAiBrainSessionId() {
+    var bundle = null; try { bundle = saasChatBundle(); } catch (e) {}
+    var actor = String(bundle && bundle.user && (bundle.user.id || bundle.user.user_id) || 'anonymous').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64) || 'anonymous';
+    var ctx = window.__ME_SAAS_CTX;
+    var tenant = String(ctx && ctx.ns || 'default').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64) || 'default';
+    var key = 'maya_brain_session_v1:' + tenant + ':' + actor;
+    var id = ''; try { id = String(sessionStorage.getItem(key) || ''); } catch (e2) {}
+    if (!/^[A-Za-z0-9_-]{8,128}$/.test(id)) {
+      try { id = 'brain-' + crypto.randomUUID(); } catch (e3) { id = 'brain-' + Date.now() + '-' + Math.random().toString(36).slice(2, 12); }
+      try { sessionStorage.setItem(key, id); } catch (e4) {}
+    }
+    return id;
+  }
   async function saasAiSend(text) {
     setSending(true);
     var reqId = '';
@@ -13416,7 +13429,7 @@ function AChat() {
     try {
       var d = await saasAiFetch('/ai/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ surface: surface, requestId: reqId, messages: hist })
+        body: JSON.stringify({ surface: surface, requestId: reqId, brainSessionId: saasAiBrainSessionId(), messages: hist })
       });
       var reply = String((d && d.reply) || 'Готово.');
       var approval = d && d.action && d.action.status === 'approval_required' && d.action.approval ? d.action.approval : null;
