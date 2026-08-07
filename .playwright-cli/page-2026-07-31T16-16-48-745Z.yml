@@ -1,0 +1,10 @@
+- generic [ref=f5e2]:
+  - generic [ref=f5e213]:
+    - generic [ref=f5e214]: Моя база
+    - heading "Клиенты" [level=1] [ref=f5e215]
+    - generic [ref=f5e216]: Не удалось загрузить. Попробуйте позже.
+  - generic [ref=f5e58]:
+    - generic [ref=f5e59] [cursor=pointer]: Кабинет
+    - generic [ref=f5e66] [cursor=pointer]: Чат
+    - generic [ref=f5e71] [cursor=pointer]: Финансы
+    - generic [ref=f5e74] [cursor=pointer]: Клиенты

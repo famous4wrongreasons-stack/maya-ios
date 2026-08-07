@@ -1,1 +1,2 @@
 CAPACITOR_DEBUG = true
+MAYA_OS_PREVIEW_API_BASE = https:/$()/mayaos.ru/api

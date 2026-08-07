@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Мужская Эстетика</string>
+    <string name="title_activity_main">Мужская Эстетика</string>
+    <string name="package_name">pro.malesthetic.app</string>
+    <string name="custom_url_scheme">pro.malesthetic.app</string>
+</resources>

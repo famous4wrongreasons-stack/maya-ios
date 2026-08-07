@@ -1,0 +1,15 @@
+- generic [ref=f1e10]:
+  - generic [ref=f1e11]:
+    - generic [ref=f1e20]: MAYA
+    - generic [ref=f1e21]: AI Business Operating System
+    - paragraph [ref=f1e22]: Ваш ИИ-администратор бизнеса. Вход по email — Telegram не требуется.
+  - generic [ref=f1e23]:
+    - generic [ref=f1e24] [cursor=pointer]: Получить пробную версию MAYA OS
+    - generic [ref=f1e34]: или
+    - generic [ref=f1e38] [cursor=pointer]: Войти по email
+    - generic [ref=f1e43] [cursor=pointer]:
+      - generic [ref=f1e44]: Я
+      - generic [ref=f1e45]: Войти через Яндекс
+    - generic [ref=f1e46] [cursor=pointer]: Войти через Telegram
+    - generic [ref=f1e51]: Доступно после настройки MAYA
+    - generic [ref=f1e56]: Данные защищены · 152-ФЗ

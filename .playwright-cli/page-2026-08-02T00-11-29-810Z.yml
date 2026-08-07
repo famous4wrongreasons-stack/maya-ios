@@ -1,0 +1,81 @@
+- generic [ref=f4e2]:
+  - generic [ref=f4e108]:
+    - generic [ref=f4e109]:
+      - generic [ref=f4e110]: Панель управления
+      - generic [ref=f4e111]: Владелец
+    - generic [ref=f4e112]:
+      - button "MAYA" [ref=f4e113]
+      - button "Аналитика" [ref=f4e114]
+      - button "Расписание" [ref=f4e115]
+      - button "Сотрудники" [ref=f4e116]
+      - button "Услуги" [ref=f4e117]
+      - button "Клиенты" [ref=f4e118]
+      - button "Интеграции" [ref=f4e119]
+      - button "Профиль" [ref=f4e120]
+    - generic [ref=f4e121]:
+      - generic [ref=f4e122]:
+        - generic [ref=f4e123]:
+          - generic [ref=f4e124]: MAYA · БИЗНЕС
+          - heading "Сегодня 10 записей" [level=1] [ref=f4e125]
+          - generic [ref=f4e126]: "Ожидаемые поступления 19 900 ₽. Источник: YClients."
+        - button "Обновить" [ref=f4e127]
+      - generic [ref=f4e128]:
+        - generic [ref=f4e129]: MAYA · ГЛАВНОЕ
+        - generic [ref=f4e139]: Сегодня 10 записей на 19 900 ₽. Проверьте ближайшие окна и загрузку сотрудников.
+        - generic [ref=f4e140]:
+          - generic [ref=f4e141]:
+            - generic [ref=f4e142]: 19 900 ₽
+            - generic [ref=f4e143]: ожидаем сегодня
+          - generic [ref=f4e144]:
+            - generic [ref=f4e145]: "10"
+            - generic [ref=f4e146]: активных записей
+        - generic [ref=f4e147]: Финансовые показатели подтверждены CRM.
+      - generic [ref=f4e148]:
+        - button "Спросить MAYA Задать вопрос по текущему бизнесу →" [ref=f4e149] [cursor=pointer]:
+          - generic [ref=f4e150]:
+            - generic [ref=f4e151]: Спросить MAYA
+            - generic [ref=f4e152]: Задать вопрос по текущему бизнесу
+          - generic [ref=f4e153]: →
+        - button "Записать клиента Открыть выбор мастера, услуги, даты и времени →" [ref=f4e154] [cursor=pointer]:
+          - generic [ref=f4e155]:
+            - generic [ref=f4e156]: Записать клиента
+            - generic [ref=f4e157]: Открыть выбор мастера, услуги, даты и времени
+          - generic [ref=f4e158]: →
+      - generic [ref=f4e159]:
+        - generic [ref=f4e160]: Ближайшие записи
+        - generic [ref=f4e161]:
+          - generic [ref=f4e163]:
+            - generic [ref=f4e164]: 10:00
+            - generic [ref=f4e165]:
+              - generic [ref=f4e166]: Владимир
+              - generic [ref=f4e167]: Стас Мосин · Стрижка машинкой + фейд
+            - generic [ref=f4e168]: 1 500 ₽
+          - generic [ref=f4e170]:
+            - generic [ref=f4e171]: 11:30
+            - generic [ref=f4e172]:
+              - generic [ref=f4e173]: Олег
+              - generic [ref=f4e174]: Александр Киянский · Детская стрижка
+            - generic [ref=f4e175]: 1 500 ₽
+          - generic [ref=f4e177]:
+            - generic [ref=f4e178]: 11:30
+            - generic [ref=f4e179]:
+              - generic [ref=f4e180]: Олег
+              - generic [ref=f4e181]: Стас Мосин · Моделирование бороды
+            - generic [ref=f4e182]: 1 200 ₽
+          - generic [ref=f4e184]:
+            - generic [ref=f4e185]: 14:00
+            - generic [ref=f4e186]:
+              - generic [ref=f4e187]: Юрий
+              - generic [ref=f4e188]: Стас Мосин · Окантовка, Окантовка бороды
+            - generic [ref=f4e189]: 2 000 ₽
+          - generic [ref=f4e191]:
+            - generic [ref=f4e192]: 14:35
+            - generic [ref=f4e193]:
+              - generic [ref=f4e194]: Максим
+              - generic [ref=f4e195]: Стас Мосин · Мужская стрижка, Окантовка бороды
+            - generic [ref=f4e196]: 2 800 ₽
+  - generic [ref=f4e69]:
+    - generic [ref=f4e70] [cursor=pointer]: Кабинет
+    - generic [ref=f4e77] [cursor=pointer]: Чат
+    - generic [ref=f4e82] [cursor=pointer]: Финансы
+    - generic [ref=f4e85] [cursor=pointer]: Клиенты

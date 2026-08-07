@@ -1,0 +1,34 @@
+- generic [ref=f5e2]:
+  - generic [ref=f5e145]:
+    - generic [ref=f5e146]:
+      - generic [ref=f5e147]: MAYA
+      - generic [ref=f5e157] [cursor=pointer]: S
+    - generic [ref=f5e158]: Добрый день, Stas
+    - generic [ref=f5e159]: Кабинет
+    - generic [ref=f5e160]:
+      - generic [ref=f5e161] [cursor=pointer]:
+        - generic [ref=f5e162]: Месяц
+        - generic [ref=f5e163]: …
+        - generic [ref=f5e164]: ₽ · валовая
+      - generic [ref=f5e165] [cursor=pointer]:
+        - generic [ref=f5e166]: Сегодня
+        - generic [ref=f5e167]: …
+        - generic [ref=f5e168]: ₽ · заработал
+      - generic [ref=f5e169] [cursor=pointer]:
+        - generic [ref=f5e170]: Записи
+        - generic [ref=f5e171]: …
+        - generic [ref=f5e172]: сегодня
+    - generic [ref=f5e173] [cursor=pointer]: Записать клиента
+    - generic [ref=f5e186] [cursor=pointer]:
+      - generic [ref=f5e187]: Спросить Maya
+      - generic [ref=f5e188]: Администратор · онлайн
+    - generic [ref=f5e192] [cursor=pointer]:
+      - generic [ref=f5e193]: Выручка сегодня
+      - generic [ref=f5e194]: … ₽
+  - generic [ref=f5e58]:
+    - generic [ref=f5e59] [cursor=pointer]: Кабинет
+    - generic [ref=f5e66] [cursor=pointer]: Чат
+    - generic [ref=f5e71] [cursor=pointer]: Финансы
+    - generic [ref=f5e74] [cursor=pointer]: Клиенты
+  - generic [ref=f5e197] [cursor=pointer]: Сменить вход
+  - generic: Пробная версия MAYA OS · 10 дн.

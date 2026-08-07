@@ -1,0 +1,26 @@
+- generic [ref=f1e64]:
+  - generic [ref=f1e75]:
+    - generic [ref=f1e76]: Maya
+    - generic [ref=f1e77]: Администратор · онлайн
+  - generic [ref=f1e80]:
+    - generic [ref=f1e131]: "Здравствуйте! Я MAYA — ассистент «Мужской Эстетики». Помогу записаться, подскажу по услугам, мастерам, ценам и абонементам. А ещё у нас есть полноценное приложение — личный кабинет, баллы и сертификаты: нажмите «Перейти в приложение» ниже. Что подсказать?"
+    - generic [ref=f1e134]: Записаться
+    - generic [ref=f1e138]:
+      - generic [ref=f1e139]: Конечно, без проблем! Подберём удобное время — выбирайте мастера 👇
+      - generic [ref=f1e140]:
+        - generic [ref=f1e141]:
+          - generic [ref=f1e142]: Выберите мастера
+          - generic [ref=f1e143] [cursor=pointer]: Стас Мосин
+          - generic [ref=f1e146] [cursor=pointer]: Илья Третьяков
+          - generic [ref=f1e149] [cursor=pointer]: Алексей Дарма
+          - generic [ref=f1e152] [cursor=pointer]: Максим Чурсинов
+          - generic [ref=f1e155] [cursor=pointer]: Александр Киянский
+        - button "Связаться с администратором" [ref=f1e158] [cursor=pointer]
+  - generic [ref=f1e98]:
+    - button "Записать голосовое сообщение. Кнопку можно перемещать" [ref=f1e100] [cursor=pointer]
+    - textbox "Сообщение Maya…" [ref=f1e107]
+    - generic [ref=f1e108]:
+      - generic [ref=f1e109] [cursor=pointer]: Запись
+      - generic [ref=f1e115] [cursor=pointer]: Чат
+      - generic [ref=f1e120] [cursor=pointer]: Записи
+      - generic [ref=f1e126] [cursor=pointer]: Профиль

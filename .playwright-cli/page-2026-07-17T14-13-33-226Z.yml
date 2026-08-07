@@ -1,0 +1,27 @@
+- generic [ref=e182]:
+  - generic [ref=e193]:
+    - generic [ref=e194]: Maya
+    - generic [ref=e195]: Администратор · онлайн
+  - generic [ref=e198]:
+    - generic [ref=e199]: Здравствуйте! Я Майя, помогу настроить ваш бизнес. Вы работаете на себя или у вас бизнес?
+    - generic [ref=e214]: Я работаю на себя
+    - generic [ref=e217]: Чем вы занимаетесь?
+    - generic [ref=e220]:
+      - button "Барбер" [ref=e221] [cursor=pointer]
+      - button "Парикмахер" [ref=e222] [cursor=pointer]
+      - button "Мастер ногтей" [ref=e223] [cursor=pointer]
+      - button "Косметолог" [ref=e224] [cursor=pointer]
+      - button "Массажист" [ref=e225] [cursor=pointer]
+      - button "Тренер" [ref=e226] [cursor=pointer]
+      - button "Стоматолог" [ref=e227] [cursor=pointer]
+      - button "Юрист / адвокат" [ref=e228] [cursor=pointer]
+      - button "Психолог" [ref=e229] [cursor=pointer]
+      - button "Репетитор" [ref=e230] [cursor=pointer]
+      - button "Фотограф" [ref=e231] [cursor=pointer]
+      - button "Грумер" [ref=e232] [cursor=pointer]
+      - button "Другая профессия" [ref=e233] [cursor=pointer]
+      - button "Начать заново" [ref=e234] [cursor=pointer]
+  - generic [ref=e206]:
+    - textbox "Сообщение Maya…" [ref=e207]
+    - generic "Нажмите — запись, ещё раз — отправить" [ref=e208] [cursor=pointer]
+    - generic [ref=e212]: ↑

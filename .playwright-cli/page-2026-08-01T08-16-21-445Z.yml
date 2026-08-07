@@ -1,0 +1,20 @@
+- generic [ref=f2e2]:
+  - generic [ref=f2e10]:
+    - generic [ref=f2e11]:
+      - generic [ref=f2e12]: Мастер
+      - generic [ref=f2e13]: ›
+      - generic [ref=f2e14]: Услуга
+      - generic [ref=f2e15]: ›
+      - generic [ref=f2e16]: Дата
+      - generic [ref=f2e17]: ›
+      - generic [ref=f2e18]: Время
+    - generic [ref=f2e19]:
+      - generic [ref=f2e20]: Нет связи
+      - heading "Не удалось подключиться" [level=2] [ref=f2e21]: Не удалосьподключиться
+      - generic [ref=f2e22]: Нет связи с сервером — вход сохранён.
+      - generic [ref=f2e23]: Повторить
+  - generic [ref=f2e31]:
+    - generic [ref=f2e32] [cursor=pointer]: Кабинет
+    - generic [ref=f2e39] [cursor=pointer]: Чат
+    - generic [ref=f2e44] [cursor=pointer]: Финансы
+    - generic [ref=f2e47] [cursor=pointer]: Клиенты

@@ -1,0 +1,18 @@
+- generic [ref=e182]:
+  - generic [ref=e193]:
+    - generic [ref=e194]: Maya
+    - generic [ref=e195]: Администратор · онлайн
+  - generic [ref=e198]:
+    - generic [ref=e199]: Здравствуйте! Я Майя, помогу настроить ваш бизнес. Вы работаете на себя или у вас бизнес?
+    - generic [ref=e214]: Я работаю на себя
+    - generic [ref=e217]: Чем вы занимаетесь?
+    - generic [ref=e235]: Я работаю барбером
+    - generic [ref=e238]: "Добавила базовые услуги: 6. Как вас знают клиенты? Можно написать имя или название. Если названия нет, пропустим этот шаг."
+    - generic [ref=e220]:
+      - button "Напишу имя или название" [ref=e241] [cursor=pointer]
+      - button "Без названия" [ref=e242] [cursor=pointer]
+      - button "Начать заново" [ref=e234] [cursor=pointer]
+  - generic [ref=e206]:
+    - textbox "Сообщение Maya…" [ref=e207]
+    - generic "Нажмите — запись, ещё раз — отправить" [ref=e208] [cursor=pointer]
+    - generic [ref=e212]: ↑

@@ -4,6 +4,8 @@
 <dict>
 	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>MayaOSPreviewAPIBase</key>
+	<string>$(MAYA_OS_PREVIEW_API_BASE)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

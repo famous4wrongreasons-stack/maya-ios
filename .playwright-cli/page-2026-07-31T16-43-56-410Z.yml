@@ -1,0 +1,21 @@
+- generic [ref=f8e2]:
+  - generic [ref=f8e10]:
+    - generic [ref=f8e11]:
+      - generic [ref=f8e12]: Мастер
+      - generic [ref=f8e13]: ›
+      - generic [ref=f8e14]: Услуга
+      - generic [ref=f8e15]: ›
+      - generic [ref=f8e16]: Дата
+      - generic [ref=f8e17]: ›
+      - generic [ref=f8e18]: Время
+    - generic [ref=f8e19]:
+      - generic [ref=f8e23]:
+        - generic [ref=f8e24]: Локальный safe mode
+        - generic [ref=f8e25]: Новый backend подключен только к этой локальной копии приложения. Реальная запись отключена.
+        - generic [ref=f8e26]: muzhskaya-estetika-3 · 127.0.0.1:8892/api
+      - generic [ref=f8e27]: Проверяем сессию…
+  - generic [ref=f8e29]:
+    - generic [ref=f8e30] [cursor=pointer]: Кабинет
+    - generic [ref=f8e37] [cursor=pointer]: Чат
+    - generic [ref=f8e42] [cursor=pointer]: Финансы
+    - generic [ref=f8e45] [cursor=pointer]: Клиенты
