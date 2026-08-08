@@ -1,9 +1,9 @@
 {
-  "appId": "pro.malesthetic.app",
-  "appName": "Мужская Эстетика",
+  "appId": "ru.mayaos.app",
+  "appName": "MAYA OS",
   "webDir": "www",
   "server": {
-    "hostname": "malesthetic.pro",
+    "hostname": "mayaos.ru",
     "iosScheme": "https",
     "cleartext": false
   },

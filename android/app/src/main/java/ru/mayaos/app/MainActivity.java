@@ -1,4 +1,4 @@
-package pro.malesthetic.app;
+package ru.mayaos.app;
 
 import com.getcapacitor.BridgeActivity;
 

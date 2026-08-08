@@ -11,38 +11,52 @@ class MayaRuntimePlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func getPreviewAccess(_ call: CAPPluginCall) {
 #if DEBUG
-        let apiBase = Bundle.main.object(forInfoDictionaryKey: "MayaOSPreviewAPIBase") as? String ?? ""
-        call.resolve(["enabled": true, "apiBase": apiBase, "build": "rc-debug-11"])
+        let apiBase = Self.resolvedPreviewApiBase()
+        call.resolve(["enabled": true, "apiBase": apiBase, "build": "rc-debug-12"])
 #else
         call.resolve(["enabled": false, "apiBase": "", "build": "release"])
 #endif
     }
+
+#if DEBUG
+    /// Пустой $(MAYA_OS_PREVIEW_API_BASE) раньше оставлял API пустым → JS падал на
+    /// Capacitor-origin `https://malesthetic.pro/api` → чат «не связаться», AuditLog пуст.
+    fileprivate static func resolvedPreviewApiBase() -> String {
+        let raw = (Bundle.main.object(forInfoDictionaryKey: "MayaOSPreviewAPIBase") as? String ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "/+$", with: "", options: .regularExpression)
+        if raw.isEmpty { return "https://mayaos.ru/api" }
+        if raw.hasPrefix("http://localhost") || raw.hasPrefix("http://127.0.0.1") {
+            return "https://mayaos.ru/api"
+        }
+        return raw
+    }
+#endif
 }
 
 class MainViewController: CAPBridgeViewController {
 #if DEBUG
     private func mayaPreviewBootstrap() -> String {
-        let apiBase = Bundle.main.object(forInfoDictionaryKey: "MayaOSPreviewAPIBase") as? String ?? ""
+        let apiBase = MayaRuntimePlugin.resolvedPreviewApiBase()
         let apiBaseJSON: String
         if let data = try? JSONSerialization.data(withJSONObject: apiBase, options: [.fragmentsAllowed]),
            let value = String(data: data, encoding: .utf8) {
             apiBaseJSON = value
         } else {
-            apiBaseJSON = "\"\""
+            apiBaseJSON = "\"https://mayaos.ru/api\""
         }
 
         return """
         window.__ME_MAYA_OS_PREVIEW = true;
         window.__ME_MAYA_OS_API_BASE = \(apiBaseJSON);
         window.__ME_MAYA_OS_TENANT_SLUG = 'muzhskaya-estetika';
-        window.__ME_MAYA_OS_BUILD = 'rc-debug-11';
-        window.__ME_MAYA_OS_BOOTSTRAP_VERSION = 'native-v7-platform-bootstrap';
+        window.__ME_MAYA_OS_BUILD = 'rc-debug-12';
+        window.__ME_MAYA_OS_BOOTSTRAP_VERSION = 'native-v8-chat-api-fix';
         try {
             if (window.__ME_MAYA_OS_API_BASE) {
                 var previousBootstrap = localStorage.getItem('me_native_bootstrap_version');
                 if (previousBootstrap !== window.__ME_MAYA_OS_BOOTSTRAP_VERSION) {
-                    // This intentionally resettable RC build must start onboarding
-                    // without identities, tenants or workspace choices from older tests.
+                    // RC: сброс stale localhost / чужого api base при смене bootstrap.
                     localStorage.clear();
                     sessionStorage.clear();
                 }
@@ -74,7 +88,7 @@ class MainViewController: CAPBridgeViewController {
 #if DEBUG
         webView?.evaluateJavaScript(mayaPreviewBootstrap()) { result, error in
             let enabled = (result as? Bool) == true && error == nil
-            print("MAYA RC preview access: \(enabled ? "enabled" : "failed")")
+            print("MAYA RC preview access: \(enabled ? "enabled" : "failed") api=\(MayaRuntimePlugin.resolvedPreviewApiBase())")
         }
 #endif
     }
