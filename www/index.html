@@ -8008,7 +8008,20 @@ function AClientHome() {
       backgroundImage: window.__meAvatar ? `url(${window.__meAvatar})` : "none",
       backgroundSize: "120%", backgroundPosition: "center", backgroundRepeat: "no-repeat", overflow: "hidden"
     }
-  }, window.__meAvatar ? null : ((d.cabinet && d.cabinet.firstName ? d.cabinet.firstName : "М").charAt(0)))), /*#__PURE__*/React.createElement("div", {
+  }, window.__meAvatar ? null : ((d.cabinet && d.cabinet.firstName ? d.cabinet.firstName : "М").charAt(0)))), (typeof meAppAccessIsClientPreview === 'function' && meAppAccessIsClientPreview()) ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "0 0 14px",
+      padding: "12px 14px",
+      borderRadius: 14,
+      border: "1px solid " + t.line,
+      background: t.card,
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: t.ink }
+  }, "Безопасный просмотр"), /*#__PURE__*/React.createElement("div", {
+    style: { fontFamily: BODY, fontSize: 12.5, lineHeight: 1.5, color: t.dim, marginTop: 6 }
+  }, "Доступны запись и публичные данные бизнеса. История посещений, баллы лояльности и чужие персональные данные недоступны.")) : null, /*#__PURE__*/React.createElement("div", {
     // 3A: карточка «Ближайшее окно» + CTA
     "data-coach": "c-book",
     style: {
@@ -8534,7 +8547,7 @@ function AClientCabinet({
           maxWidth: 280,
           margin: "0 0 24px"
         }
-      }, "Безопасный клиентский preview: без истории посещений, баллов и чужих персональных данных."), /*#__PURE__*/React.createElement("div", {
+      }, "Это безопасный клиентский preview. История посещений, баллы лояльности и чужие персональные данные недоступны."), /*#__PURE__*/React.createElement("div", {
         onClick: () => window.__meGo && window.__meGo("home"),
         style: { cursor: "pointer" }
       }, /*#__PURE__*/React.createElement(PrimaryPill, {
@@ -36259,12 +36272,21 @@ function ChooseVersion() {
     }
   } catch (e) {}
   var modes = (access && access.available_modes) || [];
+  var narrow = false;
+  var shortH = false;
+  try {
+    narrow = Math.min(window.innerWidth || 0, document.documentElement.clientWidth || 0) < 390;
+    shortH = Math.min(window.innerHeight || 0, document.documentElement.clientHeight || 0) < 760;
+  } catch (e2) {}
+  var logoSize = shortH ? 56 : (narrow ? 72 : 88);
   function roleBtn(label, sub, iconPaths, filled, onTap) {
     return React.createElement('div', {
       onClick: onTap,
+      role: 'button',
+      tabIndex: 0,
       style: {
-        display: 'flex', alignItems: 'center', gap: 12, width: '100%',
-        padding: '15px 18px', borderRadius: 16, boxSizing: 'border-box',
+        display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%',
+        padding: narrow ? '13px 15px' : '15px 18px', borderRadius: 16, boxSizing: 'border-box',
         border: filled ? '0' : '1px solid ' + line2,
         background: filled ? t.ink : (dark ? 'rgba(244,240,235,0.05)' : 'rgba(24,22,15,0.045)'),
         color: filled ? invFg : t.ink, cursor: 'pointer'
@@ -36272,14 +36294,14 @@ function ChooseVersion() {
     }, React.createElement('svg', {
       width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none',
       stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round',
-      style: { flexShrink: 0 }
+      style: { flexShrink: 0, marginTop: 1 }
     }, iconPaths.map(function (d, k) { return React.createElement('path', { key: k, d: d }); })),
-    React.createElement('div', { style: { flex: 1, textAlign: 'left' } },
+    React.createElement('div', { style: { flex: 1, minWidth: 0, textAlign: 'left' } },
       React.createElement('div', {
-        style: { fontFamily: DISPLAY, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 400 }
+        style: { fontFamily: DISPLAY, fontSize: narrow ? 11 : 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 400 }
       }, label),
       sub ? React.createElement('div', {
-        style: { fontFamily: BODY, fontSize: 11.5, lineHeight: 1.45, opacity: 0.72, marginTop: 4, textTransform: 'none', letterSpacing: 0 }
+        style: { fontFamily: BODY, fontSize: narrow ? 11 : 11.5, lineHeight: 1.45, opacity: 0.72, marginTop: 4, textTransform: 'none', letterSpacing: 0 }
       }, sub) : null
     ));
   }
@@ -36306,24 +36328,7 @@ function ChooseVersion() {
     }
   };
   if (!access) {
-    return React.createElement('div', {
-      style: {
-        position: 'fixed', inset: 0, zIndex: 60, background: t.bg,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '24px 28px', boxSizing: 'border-box', textAlign: 'center'
-      }
-    }, React.createElement('div', {
-      style: { fontFamily: DISPLAY, fontSize: 15, letterSpacing: '0.14em', textTransform: 'uppercase', color: t.ink, marginBottom: 12 }
-    }, 'Нужен app_access'), React.createElement('div', {
-      style: { fontFamily: BODY, fontSize: 13, lineHeight: 1.55, color: t.dim, maxWidth: 280 }
-    }, window.__meAppAccessCompatError || (typeof meAppAccessCompatMessage === 'function' ? meAppAccessCompatMessage() : 'Сервер не вернул режимы доступа.')), React.createElement('div', {
-      onClick: function () {
-        if (typeof meAppAccessFetchAndRoute === 'function') {
-          meAppAccessFetchAndRoute({}).catch(function () { if (window.__meGo) window.__meGo('access-compat'); });
-        }
-      },
-      style: { marginTop: 22, padding: '12px 22px', borderRadius: 999, background: t.ink, color: invFg, fontFamily: DISPLAY, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }
-    }, 'Повторить /me'));
+    return React.createElement(AccessCompatScreen);
   }
   var brandName = (window.APP_DATA && window.APP_DATA.brand && window.APP_DATA.brand.name) || (window.__SAAS_TENANT && window.__SAAS_TENANT.name) || 'MAYA OS';
   var hint = modes.length > 1
@@ -36335,22 +36340,28 @@ function ChooseVersion() {
     style: {
       position: 'fixed', inset: 0, zIndex: 60, background: t.bg,
       display: 'flex', flexDirection: 'column', boxSizing: 'border-box',
-      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 60px)',
-      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)'
+      paddingTop: 'calc(env(safe-area-inset-top, 0px) + ' + (shortH ? 24 : 40) + 'px)',
+      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+      overflowY: 'auto', WebkitOverflowScrolling: 'touch'
     }
   }, React.createElement('div', {
-    style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 30px 0', textAlign: 'center' }
+    style: {
+      width: '100%', maxWidth: 420, margin: '0 auto',
+      display: 'flex', flexDirection: 'column', minHeight: '100%', boxSizing: 'border-box'
+    }
   }, React.createElement('div', {
-    style: { width: 88, height: 88, display: 'flex', alignItems: 'center', justifyContent: 'center' }
-  }, React.createElement(LogoM, { color: t.ink, size: 88 })), React.createElement('div', {
-    style: { fontFamily: DISPLAY, fontSize: 15, fontWeight: 300, letterSpacing: '0.2em', textTransform: 'uppercase', color: t.ink, marginTop: 16 }
+    style: { flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: (shortH ? '8px' : '12px') + ' 24px 0', textAlign: 'center' }
+  }, React.createElement('div', {
+    style: { width: logoSize, height: logoSize, display: 'flex', alignItems: 'center', justifyContent: 'center' }
+  }, React.createElement(LogoM, { color: t.ink, size: logoSize })), React.createElement('div', {
+    style: { fontFamily: DISPLAY, fontSize: narrow ? 13 : 15, fontWeight: 300, letterSpacing: '0.2em', textTransform: 'uppercase', color: t.ink, marginTop: shortH ? 10 : 14 }
   }, brandName), React.createElement('div', {
     style: { fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.3em', textTransform: 'uppercase', color: t.dim, marginTop: 8 }
   }, 'Выбор режима'), React.createElement('div', {
-    style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.6, maxWidth: 260, marginTop: 16 }
+    style: { fontFamily: BODY, fontSize: 12, color: t.dim, lineHeight: 1.6, maxWidth: 280, marginTop: shortH ? 10 : 14 }
   }, hint)), React.createElement('div', {
-    style: { padding: '0 24px', display: 'flex', flexDirection: 'column', gap: 10 }
-  }, modes.map(function (m, idx) {
+    style: { flex: '1 1 auto', padding: (shortH ? '16px' : '22px') + ' 20px 8px', display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'flex-end' }
+  }, modes.length ? modes.map(function (m, idx) {
     var meta = MODE_META[m.mode] || { label: m.mode, sub: '', icons: ['M12 12h.01'] };
     var sub = meta.sub;
     if (m.mode === 'client' && m.access === 'preview') {
@@ -36361,9 +36372,11 @@ function ChooseVersion() {
     return roleBtn(meta.label, sub, meta.icons, idx === 0, function () {
       if (typeof meAppAccessOpenMode === 'function') meAppAccessOpenMode(m.mode);
     });
-  }), React.createElement('div', {
-    style: { textAlign: 'center', fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, marginTop: 6 }
-  }, 'Режимы приходят только с сервера')));
+  }) : React.createElement('div', {
+    style: { padding: '14px 16px', borderRadius: 14, border: '1px dashed ' + t.line, fontFamily: BODY, fontSize: 12.5, lineHeight: 1.5, color: t.dim, textAlign: 'center' }
+  }, 'Сервер не вернул доступных режимов для этой учётной записи.'), React.createElement('div', {
+    style: { textAlign: 'center', fontFamily: DISPLAY, fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: t.faint, marginTop: 6, paddingBottom: 4 }
+  }, 'Режимы приходят только с сервера'))));
 }
 function AccessCompatScreen() {
   var dark = window.__meDark;
@@ -36374,25 +36387,30 @@ function AccessCompatScreen() {
     style: {
       position: 'fixed', inset: 0, zIndex: 60, background: t.bg,
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '28px 30px', boxSizing: 'border-box', textAlign: 'center'
+      padding: 'calc(env(safe-area-inset-top, 0px) + 28px) 28px calc(env(safe-area-inset-bottom, 0px) + 28px)',
+      boxSizing: 'border-box', textAlign: 'center', overflowY: 'auto'
     }
+  }, React.createElement('div', {
+    style: { width: '100%', maxWidth: 340 }
   }, React.createElement('div', {
     style: { fontFamily: DISPLAY, fontSize: 14, letterSpacing: '0.16em', textTransform: 'uppercase', color: t.ink, marginBottom: 14 }
   }, 'Совместимость сервера'), React.createElement('div', {
-    style: { fontFamily: BODY, fontSize: 13.5, lineHeight: 1.55, color: t.dim, maxWidth: 300 }
+    style: { fontFamily: BODY, fontSize: 13.5, lineHeight: 1.55, color: t.dim }
   }, msg), React.createElement('div', {
+    style: { fontFamily: BODY, fontSize: 12, lineHeight: 1.5, color: t.faint, marginTop: 12 }
+  }, 'Права владельца или сотрудника локально не выдаются.'), React.createElement('div', {
     onClick: function () {
       if (typeof meAppAccessFetchAndRoute === 'function') {
         meAppAccessFetchAndRoute({}).catch(function () {});
       } else if (window.__meGo) window.__meGo('login');
     },
-    style: { marginTop: 24, padding: '13px 24px', borderRadius: 999, background: t.ink, color: invFg, fontFamily: DISPLAY, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }
+    style: { marginTop: 24, padding: '13px 24px', borderRadius: 999, background: t.ink, color: invFg, fontFamily: DISPLAY, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer', display: 'inline-block' }
   }, 'Повторить'), React.createElement('div', {
     onClick: function () {
       try { if (window.__meLogout) window.__meLogout(); else if (window.__meGo) window.__meGo('login'); } catch (e) {}
     },
     style: { marginTop: 14, fontFamily: BODY, fontSize: 12.5, color: t.dim, cursor: 'pointer' }
-  }, 'Выйти'));
+  }, 'Выйти')));
 }
 function MEApp() {
   const [screen, setScreen] = React.useState(function () {
@@ -36925,9 +36943,9 @@ function MEApp() {
   }, screenInner);
   const fabScreens = ['home', 'services', 'cutmatch'];
   const showFab = modeRef.current !== 'staff' && fabScreens.indexOf(screen) >= 0 && window.AChat && !!(window.__meHasSession && window.__meHasSession());
-  // Плавающие док-кнопки («Сменить вход» / FAB) — на 70px выше нового положения
-  // навбара (env(safe-area-inset-bottom) + 12px), чтобы держаться над ним с просветом.
-  const floatDockBottom = 'calc(env(safe-area-inset-bottom, 0px) + 82px + 100dvh - 100vh)';
+  // Плавающие док-кнопки («Сменить режим» / FAB) — над нижним меню с запасом,
+  // чтобы не перекрывать tab bar на iPhone с home-indicator.
+  const floatDockBottom = 'calc(env(safe-area-inset-bottom, 0px) + 96px + 100dvh - 100vh)';
   const compactRootHome = (typeof meCompactViewport === 'function' && meCompactViewport()) && (screen === 'home' || screen === 'staff-home');
   const hideClientHomeFloat = (screen === 'home' || screen === 'staff-home') && (floatDockHidden || compactRootHome);
   const fab = showFab ? React.createElement('div', {
@@ -37024,12 +37042,15 @@ function MEApp() {
   })) : null;
   var _lt = tokens('aurora', window.__meDark);
   // «Сменить режим» — только когда сервер сказал can_switch_mode=true.
-  var _showSwitch = ['home', 'staff-home', 'panel', 'cabinet', 'book', 'chat'].indexOf(screen) >= 0
+  // Не показываем на chat: там нижний composer, кнопка перекрывала бы ввод.
+  var _showSwitch = ['home', 'staff-home', 'panel', 'cabinet', 'book'].indexOf(screen) >= 0
     && typeof meAppAccessCanSwitch === 'function' && meAppAccessCanSwitch();
   var switchBtn = _showSwitch ? React.createElement('div', {
     onClick: function () {
       window.__meGo && window.__meGo('choose');
     },
+    role: 'button',
+    'aria-label': 'Сменить режим',
     style: {
       position: 'fixed',
       left: 16,
@@ -37038,7 +37059,8 @@ function MEApp() {
       display: 'flex',
       alignItems: 'center',
       gap: 7,
-      padding: '7px 12px',
+      maxWidth: 'calc(100vw - 96px)',
+      padding: '8px 13px',
       borderRadius: 999,
       cursor: 'pointer',
       background: '#000000',
@@ -37059,7 +37081,8 @@ function MEApp() {
     stroke: '#ffffff',
     strokeWidth: 1.7,
     strokeLinecap: 'round',
-    strokeLinejoin: 'round'
+    strokeLinejoin: 'round',
+    style: { flexShrink: 0 }
   }, React.createElement('path', {
     d: 'M17 4l3 3-3 3'
   }), React.createElement('path', {
@@ -37075,7 +37098,10 @@ function MEApp() {
       fontSize: 8.5,
       letterSpacing: '0.12em',
       textTransform: 'uppercase',
-      color: '#ffffff'
+      color: '#ffffff',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     }
   }, 'Сменить режим')) : null;
   var logoutEl = logoutOpen ? React.createElement('div', {
