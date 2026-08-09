@@ -4809,6 +4809,40 @@ function meSaasCurrentBundle() {
     return b;
   } catch (e) { return null; }
 }
+function meSaasClearStoredSession(reason) {
+  var ctx = window.__ME_SAAS_CTX;
+  var bundle = meSaasCurrentBundle();
+  try {
+    if (ctx && ctx.ns) {
+      localStorage.removeItem('me_saas_auth_v2:' + ctx.ns);
+      localStorage.removeItem('me_saas_refresh_lock:' + ctx.ns);
+    }
+  } catch (e) {}
+  try {
+    if (typeof meAppAccessClearSessionState === 'function') {
+      meAppAccessClearSessionState(bundle && bundle.user);
+    }
+  } catch (e2) {}
+  window.__SAAS_FEATURES = [];
+  window.__SAAS_FEATURES_EFFECTIVE = false;
+  try { window.dispatchEvent(new CustomEvent('me-saas-logout', { detail: { reason: reason || null } })); } catch (e3) {}
+  return bundle;
+}
+function meSaasLogoutCurrentSession(reason) {
+  var ctx = window.__ME_SAAS_CTX;
+  var bundle = meSaasClearStoredSession(reason || 'logout');
+  if (ctx && ctx.api && bundle && bundle.token) {
+    try {
+      fetch(String(ctx.api).replace(/\/+$/, '') + '/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + bundle.token }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  return true;
+}
+window.meSaasClearStoredSession = meSaasClearStoredSession;
+window.meSaasLogoutCurrentSession = meSaasLogoutCurrentSession;
 function meSaasCurrentRole() {
   var b = meSaasCurrentBundle();
   return String(b && b.user && b.user.role || '').toLowerCase();
@@ -5035,31 +5069,25 @@ function meSaasRefreshIdentity() {
       throw empty;
     }
     meSaasStoreUser(user);
-    if (user.app_access && typeof meAppAccessResolveFromMe === 'function') {
-      var keepMode = typeof meAppAccessCurrentMode === 'function' ? meAppAccessCurrentMode() : null;
-      var resolved = meAppAccessResolveFromMe(user, { skipChooser: true, forceMode: keepMode || undefined });
-      if (!resolved.ok) {
-        var compat = new Error(resolved.message || 'app_access_missing');
-        compat.code = resolved.reason || 'missing_app_access';
-        throw compat;
+    var keepMode = typeof meAppAccessCurrentMode === 'function' ? meAppAccessCurrentMode() : null;
+    var resolved = meAppAccessResolveFromMe(user, { skipChooser: true, forceMode: keepMode || undefined });
+    if (!resolved.ok) {
+      if (typeof meAppAccessEnterCompat === 'function') {
+        meAppAccessEnterCompat(resolved.message, resolved.reason);
       }
-      if (keepMode && resolved.mode !== keepMode) {
-        // Сохранённый/текущий режим исчез из нового app_access — уходим на default.
-        meAppAccessOpenMode(resolved.mode, { user: user });
-        return user;
-      }
-      if (resolved.mode === 'owner') meAppAccessApplyOwnerPresentation(user);
-      else if (resolved.mode === 'staff') meAppAccessApplyStaffPresentation(user);
-      else if (resolved.mode === 'client') meAppAccessApplyClientPresentation(user, resolved.descriptor && resolved.descriptor.access);
-      else if (resolved.mode === 'platform') meAppAccessApplyPlatformPresentation(user);
-      if (window.__meRefresh) window.__meRefresh();
+      var compat = new Error(resolved.message || 'app_access_missing');
+      compat.code = resolved.reason || 'missing_app_access';
+      throw compat;
+    }
+    if (keepMode && resolved.mode !== keepMode) {
+      // The current mode was revoked server-side. Leave its screen immediately.
+      meAppAccessOpenMode(resolved.mode, { user: user });
       return user;
     }
-    if (!meSaasApplyIdentity(user)) {
-      var err = new Error('owner_membership_required');
-      err.code = 'owner_membership_required';
-      throw err;
-    }
+    if (resolved.mode === 'owner') meAppAccessApplyOwnerPresentation(user);
+    else if (resolved.mode === 'staff') meAppAccessApplyStaffPresentation(user);
+    else if (resolved.mode === 'client') meAppAccessApplyClientPresentation(user, resolved.descriptor && resolved.descriptor.access);
+    else if (resolved.mode === 'platform') meAppAccessApplyPlatformPresentation(user);
     if (window.__meRefresh) window.__meRefresh();
     return user;
   });
@@ -5079,20 +5107,32 @@ function meAppAccessNormalize(raw) {
   if (!raw || typeof raw !== 'object') return null;
   if (Number(raw.schema_version) !== 1) return null;
   if (!Array.isArray(raw.available_modes)) return null;
+  var seen = {};
+  var normalizedModes = [];
+  for (var i = 0; i < raw.available_modes.length; i++) {
+    var item = raw.available_modes[i];
+    if (!item || typeof item !== 'object') return null;
+    var mode = String(item.mode || '').toLowerCase();
+    var level = String(item.access || '').toLowerCase();
+    if (ME_APP_MODES.indexOf(mode) < 0 || seen[mode]) return null;
+    if (level !== 'granted' && level !== 'preview') return null;
+    // Preview is a deliberately restricted client surface, never a staff shortcut.
+    if (mode !== 'client' && level !== 'granted') return null;
+    seen[mode] = true;
+    normalizedModes.push({
+      mode: mode,
+      access: level,
+      tenant_id: item.tenant_id == null ? null : String(item.tenant_id),
+      role: String(item.role || ''),
+      profile_linked: !!item.profile_linked
+    });
+  }
+  var defaultMode = raw.default_mode == null ? null : String(raw.default_mode).toLowerCase();
+  if (defaultMode && !seen[defaultMode]) return null;
   return {
     schema_version: 1,
-    default_mode: raw.default_mode == null ? null : String(raw.default_mode).toLowerCase(),
-    available_modes: raw.available_modes.filter(function (m) {
-      return m && ME_APP_MODES.indexOf(String(m.mode || '').toLowerCase()) >= 0;
-    }).map(function (m) {
-      return {
-        mode: String(m.mode).toLowerCase(),
-        access: String(m.access || 'granted').toLowerCase() === 'preview' ? 'preview' : 'granted',
-        tenant_id: m.tenant_id == null ? null : String(m.tenant_id),
-        role: String(m.role || ''),
-        profile_linked: !!m.profile_linked
-      };
-    }),
+    default_mode: defaultMode,
+    available_modes: normalizedModes,
     can_switch_mode: !!raw.can_switch_mode,
     chooser_required: !!raw.chooser_required
   };
@@ -5130,6 +5170,31 @@ function meAppAccessClearSaved(tenantId, userId) {
   if (!tenantId || !userId) return;
   try { localStorage.removeItem(meAppAccessModeStorageKey(tenantId, userId)); } catch (e) {}
 }
+function meAppAccessResetPresentation() {
+  window.__meAppMode = null;
+  window.__meAppModeAccess = null;
+  window.__meClientPreview = false;
+  window.__meRole = null;
+  window.__meIsStaff = false;
+  window.__meIsMaster = false;
+  window.__meIsFounder = false;
+  window.__meStaffName = null;
+  window.__panelInfo = null;
+  window.__meChatSurfaceOverride = null;
+  window.__meSaasWantCabinet = false;
+  window.__meSaasWantCabinetTab = null;
+  try { localStorage.removeItem('me_is_staff'); } catch (e) {}
+  try { if (typeof meSaasClearWorkspace === 'function') meSaasClearWorkspace(); } catch (e2) {}
+  try { if (typeof meSaasClearChatSurface === 'function') meSaasClearChatSurface(); } catch (e3) {}
+}
+function meAppAccessEnterCompat(message, reason) {
+  meAppAccessResetPresentation();
+  window.__meAppAccess = null;
+  window.__meAppAccessCompatError = message || meAppAccessCompatMessage();
+  if (window.__meGo) window.__meGo('access-compat');
+  if (window.__meRefresh) window.__meRefresh();
+  return { ok: false, reason: reason || 'missing_app_access', message: window.__meAppAccessCompatError };
+}
 function meAppAccessClearSessionState(user) {
   try {
     var access = meAppAccessNormalize(user && user.app_access) || window.__meAppAccess || null;
@@ -5137,13 +5202,9 @@ function meAppAccessClearSessionState(user) {
     var uid = user && user.id ? String(user.id) : null;
     if (tid && uid) meAppAccessClearSaved(tid, uid);
   } catch (e) {}
+  meAppAccessResetPresentation();
   window.__meAppAccess = null;
-  window.__meAppMode = null;
-  window.__meAppModeAccess = null;
   window.__meAppAccessCompatError = null;
-  window.__meClientPreview = false;
-  try { if (typeof meSaasClearWorkspace === 'function') meSaasClearWorkspace(); } catch (e2) {}
-  try { if (typeof meSaasClearChatSurface === 'function') meSaasClearChatSurface(); } catch (e3) {}
 }
 function meAppAccessCompatMessage() {
   return 'Сервер не вернул контракт app_access. Обновите backend MAYA OS — локально права не повышаются.';
@@ -5168,13 +5229,13 @@ function meAppAccessViewManager() {
   var mode = meAppAccessCurrentMode();
   if (mode === 'owner' || mode === 'platform') return true;
   if (mode === 'staff' || mode === 'client') return false;
-  return meSaasIsManagerRole(meSaasCurrentRole());
+  return window.__ME_SAAS_CTX ? false : meSaasIsManagerRole(meSaasCurrentRole());
 }
 function meAppAccessViewBusiness() {
   var mode = meAppAccessCurrentMode();
   if (mode === 'owner' || mode === 'staff' || mode === 'platform') return true;
   if (mode === 'client') return false;
-  return meSaasIsBusinessRole(meSaasCurrentRole()) && !meSaasIsClientWorkspace(meSaasCurrentRole());
+  return window.__ME_SAAS_CTX ? false : (meSaasIsBusinessRole(meSaasCurrentRole()) && !meSaasIsClientWorkspace(meSaasCurrentRole()));
 }
 function meAppAccessStaffExternalId(user) {
   user = user || (meSaasCurrentBundle() && meSaasCurrentBundle().user) || null;
@@ -5186,6 +5247,7 @@ function meAppAccessStaffExternalId(user) {
 function meAppAccessApplyOwnerPresentation(user) {
   meSaasApplyIdentity(user);
   window.__meAppMode = 'owner';
+  window.__meAppModeAccess = 'granted';
   window.__meRole = 'owner';
   window.__meIsStaff = true;
   window.__meIsMaster = meSaasHasStaffProfile(user);
@@ -5204,6 +5266,7 @@ function meAppAccessApplyStaffPresentation(user) {
   var name = String(user.name || '').trim() || String(user.email || '').split('@')[0] || 'Сотрудник';
   var extId = meAppAccessStaffExternalId(user);
   window.__meAppMode = 'staff';
+  window.__meAppModeAccess = 'granted';
   window.__meIsStaff = true;
   window.__meIsMaster = true;
   window.__meIsFounder = false;
@@ -5232,6 +5295,13 @@ function meAppAccessApplyClientPresentation(user, accessLevel) {
   window.__meIsMaster = false;
   window.__meIsFounder = false;
   window.__meRole = 'client';
+  window.__meStaffName = null;
+  window.__panelInfo = null;
+  try { localStorage.removeItem('me_is_staff'); } catch (e) {}
+  if (window.__meClientPreview) {
+    try { if (window.__meResetCabinetData) window.__meResetCabinetData(); } catch (e2) {}
+    window.__meCabinetState = 'preview';
+  }
   if (window.__meMode) window.__meMode('client');
   window.__meChatSurfaceOverride = 'client';
   meSaasRememberChatSurface('client');
@@ -5239,6 +5309,7 @@ function meAppAccessApplyClientPresentation(user, accessLevel) {
 function meAppAccessApplyPlatformPresentation(user) {
   meSaasStoreUser(user);
   window.__meAppMode = 'platform';
+  window.__meAppModeAccess = 'granted';
   window.__meIsFounder = true;
   window.__meIsStaff = true;
   window.__meRole = 'owner';
@@ -5250,17 +5321,14 @@ function meAppAccessResolveFromMe(user, opts) {
   window.__meAppAccessCompatError = null;
   var access = meAppAccessNormalize(user && user.app_access);
   if (!access) {
+    meAppAccessResetPresentation();
     window.__meAppAccess = null;
-    window.__meAppMode = null;
-    window.__meAppModeAccess = null;
-    window.__meClientPreview = false;
     window.__meAppAccessCompatError = meAppAccessCompatMessage();
     return { ok: false, reason: 'missing_app_access', message: window.__meAppAccessCompatError };
   }
   if (!access.available_modes.length) {
+    meAppAccessResetPresentation();
     window.__meAppAccess = access;
-    window.__meAppMode = null;
-    window.__meAppModeAccess = null;
     window.__meAppAccessCompatError = 'Для этой учётной записи нет доступных режимов приложения.';
     return { ok: false, reason: 'no_modes', message: window.__meAppAccessCompatError, access: access };
   }
@@ -5281,8 +5349,14 @@ function meAppAccessResolveFromMe(user, opts) {
   window.__meAppModeAccess = desc ? desc.access : null;
   window.__meClientPreview = mode === 'client' && desc && desc.access === 'preview';
   // Chooser after login when required and there is no valid persisted choice.
-  var chooser = !forced && !!access.chooser_required && !saved && access.available_modes.length > 1;
+  var chooser = !!(!forced && access.chooser_required && (!saved || !!opts.forceChooser) && access.available_modes.length > 1);
   if (opts.skipChooser) chooser = false;
+  if (chooser) {
+    // No mode is active until the person explicitly chooses one.
+    window.__meAppMode = null;
+    window.__meAppModeAccess = null;
+    window.__meClientPreview = false;
+  }
   return {
     ok: true,
     access: access,
@@ -5333,7 +5407,9 @@ function meAppAccessOpenMode(mode, opts) {
       window.__meChatReturn = 'home';
       if (window.__meGo) window.__meGo(opts.screen || 'home');
     } else {
-      meSaasOpenMayaChat('client', opts.screen || 'home');
+      // Granted client mode opens the personal cabinet, not the public preview/chat.
+      window.__meChatReturn = 'cabinet';
+      if (window.__meGo) window.__meGo(opts.screen || 'cabinet');
     }
     if (window.__meRefresh) window.__meRefresh();
     return true;
@@ -5350,7 +5426,7 @@ function meAppAccessRouteAfterMe(user, opts) {
   opts = opts || {};
   var resolved = meAppAccessResolveFromMe(user, opts);
   if (!resolved.ok) {
-    if (!opts.skipRedirect && window.__meGo) window.__meGo('access-compat');
+    meAppAccessEnterCompat(resolved.message, resolved.reason);
     return resolved;
   }
   meSaasStoreUser(user);
@@ -5405,6 +5481,7 @@ window.meAppAccessOpenMode = meAppAccessOpenMode;
 window.meAppAccessRouteAfterMe = meAppAccessRouteAfterMe;
 window.meAppAccessFetchAndRoute = meAppAccessFetchAndRoute;
 window.meAppAccessClearSessionState = meAppAccessClearSessionState;
+window.meAppAccessEnterCompat = meAppAccessEnterCompat;
 window.meAppAccessCanSwitch = meAppAccessCanSwitch;
 window.meAppAccessIsClientPreview = meAppAccessIsClientPreview;
 window.meAppAccessViewManager = meAppAccessViewManager;
@@ -10169,22 +10246,16 @@ function ABookFlow() {
   }, []);
   React.useEffect(function () {
     if (!localSaasMode || !saasUser) return;
-    var role = String(saasUser.role || '').toLowerCase();
-    // UI mode wins: in client app keep «Мои записи», never rewrite appts → biz.
-    if (window.__meCurMode === 'client' || (typeof meSaasIsClientWorkspace === 'function' && meSaasIsClientWorkspace(role))) {
+    var appMode = typeof meAppAccessCurrentMode === 'function' ? meAppAccessCurrentMode() : null;
+    // No server-owned mode means no presentation. The compatibility screen owns routing.
+    if (!appMode) return;
+    if (appMode === 'client') {
       try { if (window.__meMode) window.__meMode('client'); } catch (e) {}
       if (myView && myTab !== 'appts' && myTab !== 'profile') setMyTab('appts');
       return;
     }
-    var businessWorkspace = meSaasIsBusinessRole(role) && !(typeof meSaasIsClientWorkspace === 'function' && meSaasIsClientWorkspace(role));
-    if (businessWorkspace) {
-      try {
-        if (typeof meSaasApplyIdentity === 'function') meSaasApplyIdentity(saasUser);
-        if (window.__meMode) window.__meMode('staff');
-      } catch (e) {}
-    } else {
-      try { if (window.__meMode) window.__meMode('client'); } catch (e) {}
-      if (myView && myTab !== 'appts' && myTab !== 'profile') setMyTab('appts');
+    if (appMode === 'owner' || appMode === 'staff' || appMode === 'platform') {
+      try { if (window.__meMode) window.__meMode('staff'); } catch (e2) {}
     }
   }, [saasUser]);
   React.useEffect(() => {
@@ -10928,7 +10999,7 @@ function ABookFlow() {
       saasUpdateUser(fresh);
       setSaasUser(fresh);
       if (typeof meAppAccessRouteAfterMe === 'function') {
-        meAppAccessRouteAfterMe(fresh, { skipRedirect: skipRedirect });
+        meAppAccessRouteAfterMe(fresh, { skipRedirect: skipRedirect, forceChooser: !skipRedirect });
         return;
       }
       // Fail-closed без контракта: не повышаем права локально.
@@ -16037,7 +16108,8 @@ function AChat() {
 	    if (!saved || !saved.key || !saved.token) throw new Error('Не удалось подтвердить вход владельца.');
 	    var r = await fetch(String(api || '').replace(/\/+$/, '') + '/me', { headers: { Authorization: 'Bearer ' + saved.token } });
 	    var me = null; try { me = await r.json(); } catch (e) {}
-	    if (!r.ok || !onbOwnerRole(me) || String(me.tenant_id || '') !== String(saved.tenantId || '')) {
+	    var ownerMode = onbOwnerAccess(me);
+	    if (!r.ok || !ownerMode || ownerMode.access !== 'granted' || String(ownerMode.tenant_id || '') !== String(saved.tenantId || '')) {
 	      try { localStorage.removeItem(saved.key); } catch (e) {}
 	      var identityMessage = 'Сервер не подтвердил роль владельца. Бизнес не будет открыт с чужими правами.';
 	      throw Object.assign(new Error(identityMessage), { code: 'owner_identity_not_verified', emsg: identityMessage });
@@ -16047,7 +16119,9 @@ function AChat() {
 	    bundle.user = me;
 	    try { localStorage.setItem(saved.key, JSON.stringify(bundle)); } catch (e) {}
 	    var currentCtx = window.__ME_SAAS_CTX;
-	    if (currentCtx && currentCtx.ns === saved.ns && typeof meSaasApplyIdentity === 'function') meSaasApplyIdentity(me);
+	    if (currentCtx && currentCtx.ns === saved.ns && typeof meAppAccessRouteAfterMe === 'function') {
+	      meAppAccessRouteAfterMe(me, { forceMode: 'owner', skipChooser: true, skipRedirect: true });
+	    }
 	    return me;
 	  }
 	  function onbOpenApp(api, slug, cal) {
@@ -16064,9 +16138,10 @@ function AChat() {
 	    } catch (e) {}
 	    location.replace(location.pathname + '?booking_backend=saas-local&booking_api_base=' + encodeURIComponent(api) + '&booking_tenant=' + encodeURIComponent(slug) + '&onboarded=1&workspace=choose' + (cal ? '&calendar_setup=1' : ''));
 	  }
-	  function onbOwnerRole(user) {
-	    var role = String(user && user.role || '').toLowerCase();
-	    return ['tenant_admin', 'tenant_owner', 'business_owner', 'administrator'].indexOf(role) >= 0;
+	  function onbOwnerAccess(user) {
+	    var nativeAccess = typeof meAppAccessNormalize === 'function' ? meAppAccessNormalize(user && user.app_access) : null;
+	    var ownerMode = nativeAccess && typeof meAppAccessFindMode === 'function' ? meAppAccessFindMode(nativeAccess, 'owner') : null;
+	    return ownerMode && ownerMode.access === 'granted' ? ownerMode : null;
 	  }
 	  function onbRecoveryHints(hints) {
 	    hints = hints || {};
@@ -16132,7 +16207,7 @@ function AChat() {
 	        }
 	      }
 	      var me = null; if (check && check.ok) { try { me = await check.json(); } catch (e) {} }
-	      if (!me || String(me.email || '').trim().toLowerCase() !== target || !onbOwnerRole(me)) continue;
+	      if (!me || String(me.email || '').trim().toLowerCase() !== target || !onbOwnerAccess(me)) continue;
 	      b.user = me; try { localStorage.setItem(entry.key, JSON.stringify(b)); } catch (e) {}
 	      valid.push({ key: entry.key, bundle: b, api: api, index: n });
 	    }
@@ -16186,8 +16261,9 @@ function AChat() {
 	        verify = await fetch(api + '/auth/email/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: String(email || '').trim(), code: debugCode, tenantSlug: selected.slug }) }).catch(function () { return null; });
 	        try { verifyData = await verify.json(); } catch (e) { verifyData = null; }
 	      }
-	      if (verify && verify.ok && verifyData && verifyData.access_token && onbOwnerRole(verifyData.user)) {
+	      if (verify && verify.ok && verifyData && verifyData.access_token) {
 	        var saved = onbSaveBundle(verifyData, api);
+	        await onbVerifyOwnerBundle(saved, api);
 	        onbClearAllSS(); try { window.__meOnb = null; } catch (e) {}
 	        onbOpenApp(api, saved.tenantSlug, false);
 	        return true;
@@ -36355,7 +36431,7 @@ function MEApp() {
           }
           if (mode === 'client') {
             meAppAccessApplyClientPresentation(user, resolved.descriptor && resolved.descriptor.access);
-            return resolved.descriptor && resolved.descriptor.access === 'preview' ? 'home' : 'chat';
+            return resolved.descriptor && resolved.descriptor.access === 'preview' ? 'home' : 'cabinet';
           }
           if (mode === 'staff') {
             if (typeof meSaasSetWorkspace === 'function') meSaasSetWorkspace('business', true);
@@ -36523,9 +36599,12 @@ function MEApp() {
     window.__meRefresh = force;
     try {
       var _identityBundle = meSaasCurrentBundle();
-      if (_identityBundle && _identityBundle.user && meSaasIsBusinessRole(_identityBundle.user.role)) {
-        meSaasApplyIdentity(_identityBundle.user);
-        meSaasRefreshIdentity().catch(function () {});
+      if (_identityBundle && _identityBundle.user && typeof meAppAccessFetchAndRoute === 'function') {
+        meAppAccessFetchAndRoute({ skipRedirect: true, skipChooser: true }).catch(function (err) {
+          if (err && err.status === 401 && typeof meSaasClearStoredSession === 'function') {
+            meSaasClearStoredSession('me_unauthorized');
+          }
+        });
       }
     } catch (eIdentity) {}
     function go(s) {
@@ -36663,6 +36742,7 @@ function MEApp() {
       try { if (window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); } catch (eOnb) {}
       try { if (window.__meSyncAppIcon) window.__meSyncAppIcon(false); } catch (eIc) {}
       try {
+        if (typeof meSaasLogoutCurrentSession === 'function') meSaasLogoutCurrentSession('logout');
         localStorage.removeItem('web_session_token');
         localStorage.removeItem('tg_auth_data');
         localStorage.removeItem('tg_guest_mode');
@@ -38051,6 +38131,27 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
           if (window.__meRefresh) window.__meRefresh();
           return;
         }
+        if (typeof meAppAccessIsClientPreview === 'function' && meAppAccessIsClientPreview()) {
+          // Preview may render public booking data only. Clear any previous person's
+          // cabinet before loading the public staff list, and never request CRM PII.
+          try { if (window.__meResetCabinetData) window.__meResetCabinetData(); } catch (ePreviewReset) {}
+          window.__meCabinetState = 'preview';
+          _inflight.cabinet = true;
+          var previewAf = window.__meSaasAuthedFetch || (typeof meWidgetAf === 'function' ? meWidgetAf : null);
+          if (!previewAf) { _inflight.cabinet = false; return; }
+          previewAf('/staff').then(function (staffRows) {
+            _inflight.cabinet = false;
+            var staff = Array.isArray(staffRows) ? staffRows : [];
+            window.__meBookMasters = staff.map(function (m) {
+              return { id: m && (m.id != null ? m.id : m.external_id), name: (m && m.name) || 'Мастер', rank: (m && (m.title || m.specialization)) || '' };
+            }).filter(function (m) { return m.id != null && m.id !== ''; });
+            if (window.__meRefresh) window.__meRefresh();
+          }).catch(function () {
+            _inflight.cabinet = false;
+            if (window.__meRefresh) window.__meRefresh();
+          });
+          return;
+        }
         _inflight.cabinet = true;
         window.__meCabinetState = 'full';
         var af = window.__meSaasAuthedFetch || (typeof meWidgetAf === 'function' ? meWidgetAf : null);
@@ -38907,8 +39008,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     // Свежий вход (только что залогинились) → клиента ведём сразу в «Личный кабинет»,
     // а не на главную. Флаг ставит success-ветка applogin-поллинга; потребляем один раз.
     var freshLogin=false; try{ freshLogin=!!window.__meFreshLogin; window.__meFreshLogin=false; }catch(e){}
-    // P0-3: SaaS tenant-сессия (bundle без легаси-токена) → роутинг по СЕРВЕРНОЙ роли bundle;
-    // легаси panel_me тут ни при чём (это чужой бэкенд) и не должен уводить владельца на home.
+    // SaaS tenant session is routed only by the server-owned app_access contract.
+    // Cached role/workspace values are presentation leftovers and must never grant a mode.
     // external-онбординг ведёт на экран «Интеграции» — не перебиваем роль-роутером
     try { if (window.__meBootCrm) { window.__meBootCrm = false; if (window.__meMode) window.__meMode('client'); if (window.__meGo) window.__meGo('crm'); return true; } } catch (eCrm) {}
     try{
@@ -38917,32 +39018,24 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
         var _sb = JSON.parse(localStorage.getItem('me_saas_auth_v2:' + _sctx.ns) || 'null');
         var _sslug = String(_sctx.slug || '').toLowerCase();
         if (_sb && _sb.token && (!_sb.tenant_slug || String(_sb.tenant_slug).toLowerCase() === _sslug)) {
-          var _srole = String((_sb.user && _sb.user.role) || '').toLowerCase();
-          var _sbiz = meSaasIsBusinessRole(_srole);
-          if (_sbiz) {
-            meSaasApplyIdentity(_sb.user);
-            meSaasRefreshIdentity().catch(function () {});
-            var _workspace = typeof meSaasEffectiveWorkspace === 'function' ? meSaasEffectiveWorkspace(_srole) : null;
-            if (!_workspace) {
-              if (window.__meMode) window.__meMode('client');
-              window.__meGo('choose');
-            } else if (_workspace === 'business') {
-              meSaasOpenBusinessWorkspace(_srole);
-            } else {
-              meSaasOpenMayaChat('client', 'home');
-            }
-          } else {
-            meSaasOpenMayaChat('client', 'home');
-            // Кэш роли мог протухнуть (роль чинили на сервере, дубль слили,
-            // сотрудника вернули из suspended) — спрашиваем сервер и, если он
-            // отдал бизнес-роль, переигрываем маршрут вместо урезанного экрана.
-            meSaasRefreshIdentity().then(function (fresh) {
-              var freshRole = String((fresh && fresh.role) || '').toLowerCase();
-              if (!meSaasIsBusinessRole(freshRole)) return;
-              var ws = typeof meSaasEffectiveWorkspace === 'function' ? meSaasEffectiveWorkspace(freshRole) : null;
-              if (ws === 'business') meSaasOpenBusinessWorkspace(freshRole);
-              else { if (window.__meMode) window.__meMode('client'); window.__meGo('choose'); }
-            }).catch(function () {});
+          var cachedResult = null;
+          if (_sb.user && typeof meAppAccessRouteAfterMe === 'function') {
+            cachedResult = meAppAccessRouteAfterMe(_sb.user, { forceChooser: freshLogin });
+          }
+          if (!cachedResult || !cachedResult.ok) {
+            if (typeof meAppAccessEnterCompat === 'function') meAppAccessEnterCompat();
+            else window.__meGo('access-compat');
+          }
+          if (typeof meAppAccessFetchAndRoute === 'function') {
+            meAppAccessFetchAndRoute({ forceChooser: freshLogin }).catch(function (err) {
+              if (err && err.status === 401 && typeof meSaasClearStoredSession === 'function') {
+                meSaasClearStoredSession('me_unauthorized');
+                if (window.__meGo) window.__meGo('login');
+              } else if (!cachedResult || !cachedResult.ok) {
+                window.__meAppAccessCompatError = 'Не удалось проверить режимы доступа. Проверьте связь и повторите вход.';
+                if (window.__meGo) window.__meGo('access-compat');
+              }
+            });
           }
           return true;
         }
@@ -38984,7 +39077,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
     return true;
   }
   window.__meHasSession = hasSession;
-  window.__meLogout = function(){ try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(eOnb){} try{ __meSyncAppIcon(false); }catch(e0){} try{ localStorage.removeItem('web_session_token'); localStorage.removeItem('tg_auth_data'); localStorage.removeItem('tg_guest_mode'); }catch(e){} try{ __meClearIdentityCache(); }catch(e2){} if(window.__meGo) window.__meGo('login'); };
+  window.__meLogout = function(){ try{ if(window.__meClearBusinessOnboarding) window.__meClearBusinessOnboarding(); }catch(eOnb){} try{ __meSyncAppIcon(false); }catch(e0){} try{ if(typeof meSaasLogoutCurrentSession==='function') meSaasLogoutCurrentSession('logout'); }catch(eSaas){} try{ localStorage.removeItem('web_session_token'); localStorage.removeItem('tg_auth_data'); localStorage.removeItem('tg_guest_mode'); localStorage.removeItem('me_is_staff'); }catch(e){} try{ __meClearIdentityCache(); }catch(e2){} if(window.__meGo) window.__meGo('login'); };
 
   // ── 4. На старте: сперва ловим возврат VK (?code), затем — если есть сессия, минуем логин ──
   async function boot(){
