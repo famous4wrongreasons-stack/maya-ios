@@ -15247,7 +15247,7 @@ function AChat() {
         try { if (window.__meSubOpen) window.__meSubOpen({}); } catch (e2) {}
       } else if (e && e.status === 429) note = 'Слишком много запросов' + (e.retryAfterSeconds ? ' — подождите ' + Math.ceil(e.retryAfterSeconds) + ' с' : '') + '.';
       else if (e && e.status === 401) note = 'Сессия устарела — войдите снова.';
-      else if (e && e.status === 400 && e.code === 'validation') note = 'Версия чата устарела — обновите MAYA.';
+      else if (e && e.status === 400 && e.code === 'validation') note = 'Не удалось отправить сообщение — проверьте текст и попробуйте ещё раз.';
       else note = 'Не получилось связаться с MAYA — попробуйте ещё раз.';
       setMsgs(function (m) { return m.filter(function (x) { return !x.typing; }).concat([{ role: 'bot', text: note }]); });
     } finally {
