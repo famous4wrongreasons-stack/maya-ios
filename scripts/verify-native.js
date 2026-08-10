@@ -185,4 +185,17 @@ assert.ok(previewGuard >= 0 && previewReturn > previewGuard && personalPortal > 
 
 assert.ok(html.includes("meSaasLogoutCurrentSession('logout')"), 'logout clears the tenant session');
 
+const loginScrollStart = html.indexOf('const lgSmoothScrollTo = function');
+const loginScrollEnd = html.indexOf('const lgRevealAuthStack = function', loginScrollStart);
+const loginScroll = html.slice(loginScrollStart, loginScrollEnd);
+assert.ok(loginScrollStart >= 0 && loginScrollEnd > loginScrollStart, 'login reveal implementation is present');
+assert.ok(!loginScroll.includes("root.style.pointerEvents = 'none'"),
+  'login reveal never blocks Telegram and Yandex button taps');
+assert.ok(!loginScroll.includes("root.style.touchAction = 'none'"),
+  'login reveal never blocks native tap gestures');
+assert.ok(html.includes('const SocialBtn = ({') && html.includes('}) => /*#__PURE__*/React.createElement("button", {'),
+  'social login controls use semantic buttons in WKWebView');
+assert.ok(html.includes("lgSocialLogin('telegram')") && html.includes("lgSocialLogin('yandex')"),
+  'native Telegram and Yandex buttons keep their login handlers');
+
 console.log(`native verification passed (${inlineScripts.length} inline scripts)`);

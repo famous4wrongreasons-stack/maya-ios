@@ -5918,12 +5918,9 @@ function ALogin() {
       dur = Math.max(dur, Math.min(2000, 700 + dist * 1.05));
     }
     var start = 0;
-    var prevTouchAction = root.style.touchAction;
-    var prevPointer = root.style.pointerEvents;
     var prevWebkitScroll = root.style.webkitOverflowScrolling;
-    root.style.touchAction = 'none';
-    root.style.pointerEvents = 'none';
-    // Отключаем momentum-слой iOS на время хода — он и давал «двойной» глюк.
+    // Нажатия и жесты не блокируем: вход должен работать уже во время reveal.
+    // Отключаем только momentum-слой iOS — он и давал «двойной» глюк.
     root.style.webkitOverflowScrolling = 'auto';
     // Клавиатура iOS использует короткий ease-out; длинный reveal остаётся smootherstep.
     var ease = keyboardSync
@@ -5946,8 +5943,6 @@ function ALogin() {
     var finish = function () {
       clearContentMotion();
       root.scrollTop = to;
-      root.style.touchAction = prevTouchAction || 'pan-y';
-      root.style.pointerEvents = prevPointer || '';
       root.style.webkitOverflowScrolling = prevWebkitScroll || 'touch';
       lgScrollAnimRef.current = 0;
       if (typeof onDone === 'function') onDone();
@@ -7367,9 +7362,13 @@ function ALogin() {
     label,
     strong,
     onClick
-  }) => /*#__PURE__*/React.createElement("div", {
+  }) => /*#__PURE__*/React.createElement("button", {
+    type: "button",
     onClick: onClick,
     style: {
+      appearance: "none",
+      WebkitAppearance: "none",
+      WebkitTapHighlightColor: "transparent",
       display: "flex",
       alignItems: "center",
       gap: 12,
