@@ -14543,7 +14543,7 @@ function meEnsureCabinet(cb) {
 // «сказать в чат» из виджета: в легаси нет клиентских эндпоинтов отмены/покупки → отдаём намерение Майе.
 function meChatSay(text) { try { window.dispatchEvent(new CustomEvent('me-chat-say', { detail: { text: String(text || '') } })); } catch (e) {} }
 function meIsReportChatWidget(w) {
-  return ['business_report', 'master_earn', 'master_upsell'].indexOf(String(w || '').toLowerCase()) >= 0;
+  return ['business_report', 'master_earn', 'master_upsell', 'client_dossier', 'client_return_candidates'].indexOf(String(w || '').toLowerCase()) >= 0;
 }
 // Всплывающие отчётные карточки MAYA (владелец / мастер) — тот же «инвертированный» язык, что у briefing popups.
 function meReportPanelTheme(dark) {
@@ -14674,6 +14674,79 @@ function AMasterUpsellCard(props) {
     })));
 }
 window.AMasterUpsellCard = AMasterUpsellCard;
+function meClientDate(value) {
+  if (!value) return '—';
+  try {
+    var date = new Date(value);
+    return isNaN(date.getTime()) ? '—' : date.toLocaleDateString('ru-RU');
+  } catch (e) { return '—'; }
+}
+function AClientDossierCard(props) {
+  var e = React.createElement;
+  var p = meReportPanelTheme(!!props.dark);
+  var d = props.data || {};
+  var candidates = Array.isArray(d.candidates) ? d.candidates : [];
+  if (d.mode === 'ambiguous') {
+    return e(AChatReportShell, {
+      dark: props.dark, eyebrow: 'клиенты', title: d.title || 'Уточните клиента',
+      footnote: 'MAYA не выбирает первое совпадение автоматически — это защищает от открытия чужой карточки.'
+    },
+      e('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 } }, candidates.map(function (item, i) {
+        var tail = String(item && item.phone_tail || '');
+        return e('button', {
+          key: i, type: 'button', disabled: !tail,
+          onClick: function () { if (tail) meChatSay('Покажи клиента по последним цифрам ' + tail); },
+          style: {
+            width: '100%', minHeight: 48, borderRadius: 15, border: '1px solid ' + p.line,
+            background: 'transparent', color: p.ink, padding: '10px 12px', textAlign: 'left',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+            fontFamily: p.BODYF, cursor: tail ? 'pointer' : 'default'
+          }
+        },
+          e('span', { style: { fontSize: 12.5, fontWeight: 650 } }, item.display_name || 'Клиент'),
+          e('span', { style: { fontSize: 11, color: p.dim, whiteSpace: 'nowrap' } }, item.phone_masked || 'без телефона'));
+      })));
+  }
+  var services = Array.isArray(d.favorite_services) ? d.favorite_services : [];
+  var metric = function (label, value) {
+    return e('div', { style: { minWidth: 0 } },
+      e('div', { style: { fontFamily: p.BODYF, fontSize: 10.5, color: p.dim } }, label),
+      e('div', { style: { fontFamily: p.DISPF, fontWeight: 500, fontSize: 15, color: p.ink, marginTop: 3 } }, value == null ? '—' : String(value)));
+  };
+  return e(AChatReportShell, {
+    dark: props.dark, eyebrow: 'досье', title: d.title || 'Клиент', period: d.phone_masked || '',
+    footnote: d.value_note || null
+  },
+    e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '14px 0', marginTop: 12, borderTop: '1px solid ' + p.line, borderBottom: '1px solid ' + p.line } },
+      metric('Завершено визитов', d.completed_visits), metric('Привычный цикл', d.average_cycle_days != null ? d.average_cycle_days + ' дн.' : '—'),
+      metric('Неявки', d.no_shows), metric('Отмены', d.canceled_visits)),
+    e('div', { style: { fontFamily: p.BODYF, fontSize: 11.5, color: p.dim, marginTop: 12 } }, 'Последний визит · ' + meClientDate(d.last_completed_visit)),
+    services.length ? e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 10 } }, services.map(function (name, i) {
+      return e('span', { key: i, style: { border: '1px solid ' + p.line, borderRadius: 999, padding: '6px 9px', fontFamily: p.BODYF, fontSize: 10.5, color: p.ink } }, name);
+    })) : null,
+    d.booked_service_value_rub != null ? e('div', { style: { fontFamily: p.BODYF, fontSize: 12, color: p.ink, marginTop: 12 } }, 'Цены услуг в визитах · ' + meReportMoney(d.booked_service_value_rub)) : null);
+}
+window.AClientDossierCard = AClientDossierCard;
+function AClientReturnCandidatesCard(props) {
+  var e = React.createElement;
+  var p = meReportPanelTheme(!!props.dark);
+  var d = props.data || {};
+  var rows = Array.isArray(d.candidates) ? d.candidates : [];
+  return e(AChatReportShell, {
+    dark: props.dark, eyebrow: 'возврат', title: d.title || 'Клиенты для возврата',
+    period: 'Найдено: ' + Number(d.total_count || 0),
+    footnote: d.requires_confirmation ? 'Рассылка не запущена. Перед любым контактом MAYA попросит подтверждение.' : null
+  },
+    rows.length ? e('div', { style: { maxHeight: 430, overflowY: 'auto', WebkitOverflowScrolling: 'touch', marginTop: 12, borderTop: '1px solid ' + p.line } }, rows.map(function (item, i) {
+      return e('div', { key: i, style: { padding: '12px 0', borderBottom: i < rows.length - 1 ? '1px solid ' + p.line : 0 } },
+        e('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 10 } },
+          e('div', { style: { fontFamily: p.BODYF, fontWeight: 650, fontSize: 12.5, color: p.ink } }, item.display_name || 'Клиент'),
+          e('div', { style: { fontFamily: p.BODYF, fontSize: 10.5, color: p.dim, whiteSpace: 'nowrap' } }, item.phone_masked || '')),
+        e('div', { style: { fontFamily: p.BODYF, fontSize: 11, lineHeight: 1.4, color: p.dim, marginTop: 4 } }, item.reason || 'Нужен повторный контакт'),
+        e('div', { style: { fontFamily: p.BODYF, fontSize: 10, color: p.dim, marginTop: 3 } }, 'Последнее событие · ' + meClientDate(item.last_event_at)));
+    })) : e('div', { style: { fontFamily: p.BODYF, fontSize: 12, color: p.dim, marginTop: 14 } }, 'Сейчас очередь пуста.'));
+}
+window.AClientReturnCandidatesCard = AClientReturnCandidatesCard;
 // Строковое поле `widget` из ответа Майи (умный триггер) / проактивных сообщений → инлайн-карточка.
 function meRenderWidgetCard(w, t, dark, data) {
   var key = String(w || '').toLowerCase();
@@ -14684,7 +14757,8 @@ function meRenderWidgetCard(w, t, dark, data) {
   var map = {
     book: window.ABookCard, mybookings: window.AMyBookingsCard, loyalty: window.ALoyaltyCard, shop: window.AShopCard,
     profile: window.AProfileCard, history: window.AHistoryCard, referral: window.AReferralCard, notify: window.ANotifyCard, tips: window.ATipsCard,
-    business_report: window.ABusinessReportCard, master_earn: window.AMasterEarnCard, master_upsell: window.AMasterUpsellCard
+    business_report: window.ABusinessReportCard, master_earn: window.AMasterEarnCard, master_upsell: window.AMasterUpsellCard,
+    client_dossier: window.AClientDossierCard, client_return_candidates: window.AClientReturnCandidatesCard
   };
   var C = map[key];
   return C ? React.createElement(C, { key: 'w-' + key, t: t, dark: dark, data: data }) : null;
