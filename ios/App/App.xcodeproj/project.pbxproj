@@ -13,6 +13,8 @@
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		D4A100012E1B0001000A11CE /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A100002E1B0001000A11CE /* MainViewController.swift */; };
 		D4A100032E1B0001000A11CE /* TeamVoicePlayerPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A100022E1B0001000A11CE /* TeamVoicePlayerPlugin.swift */; };
+		D4A100052E1B0001000A11CE /* MayaNfcWriterPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A100042E1B0001000A11CE /* MayaNfcWriterPlugin.swift */; };
+		D4A100082E1B0001000A11CE /* MayaVoiceRecorderPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A100072E1B0001000A11CE /* MayaVoiceRecorderPlugin.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
@@ -26,6 +28,10 @@
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D4A100002E1B0001000A11CE /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		D4A100022E1B0001000A11CE /* TeamVoicePlayerPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamVoicePlayerPlugin.swift; sourceTree = "<group>"; };
+		D4A100042E1B0001000A11CE /* MayaNfcWriterPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MayaNfcWriterPlugin.swift; sourceTree = "<group>"; };
+		D4A100062E1B0001000A11CE /* MayaNfcWriter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MayaNfcWriter.entitlements; sourceTree = "<group>"; };
+		D4A100092E1B0001000A11CE /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
+		D4A100072E1B0001000A11CE /* MayaVoiceRecorderPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MayaVoiceRecorderPlugin.swift; sourceTree = "<group>"; };
 		504EC30C1FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		504EC30E1FED79650016851F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -70,6 +76,10 @@
 				504EC3071FED79650016851F /* AppDelegate.swift */,
 				D4A100002E1B0001000A11CE /* MainViewController.swift */,
 				D4A100022E1B0001000A11CE /* TeamVoicePlayerPlugin.swift */,
+				D4A100072E1B0001000A11CE /* MayaVoiceRecorderPlugin.swift */,
+				D4A100042E1B0001000A11CE /* MayaNfcWriterPlugin.swift */,
+				D4A100062E1B0001000A11CE /* MayaNfcWriter.entitlements */,
+				D4A100092E1B0001000A11CE /* App.entitlements */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -164,6 +174,8 @@
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				D4A100012E1B0001000A11CE /* MainViewController.swift in Sources */,
 				D4A100032E1B0001000A11CE /* TeamVoicePlayerPlugin.swift in Sources */,
+				D4A100082E1B0001000A11CE /* MayaVoiceRecorderPlugin.swift in Sources */,
+				D4A100052E1B0001000A11CE /* MayaNfcWriterPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,11 +314,13 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
 			buildSettings = {
+				APP_DISPLAY_NAME = "MAYA OS";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = AppIconBarber;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = YCL5U4L56W;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -316,7 +330,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
-				PRODUCT_BUNDLE_IDENTIFIER = pro.malesthetic.app;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.mayaos.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -327,11 +341,13 @@
 		504EC3181FED79650016851F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APP_DISPLAY_NAME = "MAYA OS";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = AppIconBarber;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = YCL5U4L56W;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -340,7 +356,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = pro.malesthetic.app;
+				PRODUCT_BUNDLE_IDENTIFIER = ru.mayaos.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;

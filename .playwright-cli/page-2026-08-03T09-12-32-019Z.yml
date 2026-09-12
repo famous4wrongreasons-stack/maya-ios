@@ -1,0 +1,34 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e133]:
+    - generic [ref=f1e134]:
+      - generic [ref=f1e135]: Мастер
+      - generic [ref=f1e136]: ›
+      - generic [ref=f1e137]: Услуга
+      - generic [ref=f1e138]: ›
+      - generic [ref=f1e139]: Дата
+      - generic [ref=f1e140]: ›
+      - generic [ref=f1e141]: Время
+    - generic [ref=f1e142]:
+      - generic [ref=f1e143]: Вход клиента
+      - heading "Без SMS" [level=2] [ref=f1e144]: БезSMS
+      - generic [ref=f1e145]: Яндекс или Telegram подтвердят вас и подключат вашу карточку клиента.
+      - generic [ref=f1e149]:
+        - generic [ref=f1e150]: Локальный safe mode
+        - generic [ref=f1e151]: Новый backend подключен только к этой локальной копии приложения. Реальная запись отключена.
+        - generic [ref=f1e152]: test-business · 127.0.0.1:3105/api
+      - generic [ref=f1e153] [cursor=pointer]:
+        - generic [ref=f1e154]: Я
+        - text: Войти через Яндекс
+      - generic [ref=f1e155] [cursor=pointer]:
+        - generic [ref=f1e156]: ✈
+        - text: Войти через Telegram
+      - generic [ref=f1e157]: или по номеру
+      - generic [ref=f1e161]:
+        - generic [ref=f1e162]: Телефон
+        - textbox "+7 (___) ___-__-__" [ref=f1e163]
+      - generic [ref=f1e164]: Получить код
+      - generic [ref=f1e171]: "Локальный режим: код показывается на экране."
+  - generic [ref=f1e81]:
+    - generic [ref=f1e82] [cursor=pointer]: Запись
+    - generic [ref=f1e88] [cursor=pointer]: Записи
+    - generic [ref=f1e94] [cursor=pointer]: Войти

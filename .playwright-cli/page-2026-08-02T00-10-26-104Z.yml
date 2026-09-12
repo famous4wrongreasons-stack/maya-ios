@@ -1,0 +1,35 @@
+- generic [ref=f4e2]:
+  - generic [ref=f4e11]:
+    - generic [ref=f4e12]:
+      - generic [ref=f4e13]: MAYA
+      - generic [ref=f4e23] [cursor=pointer]: S
+    - generic [ref=f4e24]: Добрый день, Stas
+    - generic [ref=f4e25]: Кабинет
+    - generic [ref=f4e26]:
+      - generic [ref=f4e27] [cursor=pointer]:
+        - generic [ref=f4e28]: Месяц
+        - generic [ref=f4e29]: …
+        - generic [ref=f4e30]: ₽ · после подключения CRM
+      - generic [ref=f4e31] [cursor=pointer]:
+        - generic [ref=f4e32]: Сегодня
+        - generic [ref=f4e33]: …
+        - generic [ref=f4e34]: ₽ · после подключения CRM
+      - generic [ref=f4e35] [cursor=pointer]:
+        - generic [ref=f4e36]: Записи
+        - generic [ref=f4e37]: …
+        - generic [ref=f4e38]: сегодня
+    - generic [ref=f4e39] [cursor=pointer]: Записать клиента
+    - generic [ref=f4e43] [cursor=pointer]: Центр управления · Владелец
+    - generic [ref=f4e57] [cursor=pointer]:
+      - generic [ref=f4e58]: Спросить Maya
+      - generic [ref=f4e59]: Администратор · онлайн
+    - generic [ref=f4e63] [cursor=pointer]:
+      - generic [ref=f4e64]: CRM ещё не подключена
+      - generic [ref=f4e65]: … ₽
+  - generic [ref=f4e69]:
+    - generic [ref=f4e70] [cursor=pointer]: Кабинет
+    - generic [ref=f4e77] [cursor=pointer]: Чат
+    - generic [ref=f4e82] [cursor=pointer]: Финансы
+    - generic [ref=f4e85] [cursor=pointer]: Клиенты
+  - generic [ref=f4e92] [cursor=pointer]: Сменить вход
+  - generic: Пробная версия MAYA OS · 10 дн.

@@ -1,0 +1,22 @@
+- generic [ref=e6]:
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e20]: MAYA
+      - generic [ref=e21]: AI Business Operating System
+      - paragraph [ref=e22]: Ваш ИИ-администратор бизнеса. Войдите, чтобы продолжить.
+    - generic [ref=e23]:
+      - generic [ref=e24] [cursor=pointer]: Получить пробную версию MAYA OS
+      - generic [ref=e34]: или
+      - generic [ref=e132] [cursor=pointer]: Войти через Telegram
+      - generic [ref=e137] [cursor=pointer]:
+        - generic [ref=e138]: Я
+        - generic [ref=e139]: Войти через Яндекс
+      - generic [ref=e140] [cursor=pointer]: Войти через email
+      - generic [ref=e51]: Продолжить без авторизации
+      - generic [ref=e56]: Данные защищены · 152-ФЗ
+  - dialog "Скоро" [ref=e145]:
+    - generic [ref=e146]:
+      - generic [ref=e156]: MAYA OS
+      - generic [ref=e157]: Скоро
+      - generic [ref=e158]: MAYA находится в разработке.
+      - button "Понятно" [ref=e159] [cursor=pointer]

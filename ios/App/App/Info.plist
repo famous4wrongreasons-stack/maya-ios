@@ -4,10 +4,12 @@
 <dict>
 	<key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
+	<key>MayaOSPreviewAPIBase</key>
+	<string>$(MAYA_OS_PREVIEW_API_BASE)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Мужская Эстетика</string>
+	<string>$(APP_DISPLAY_NAME)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,10 +28,11 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>pro.malesthetic.app</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>pro.malesthetic.app</string>
+				<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>mayaos</string>
 			</array>
 		</dict>
 	</array>
@@ -43,6 +46,8 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен, чтобы вы могли голосом общаться с ассистентом MAYA и записывать голосовые сообщения в чате.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>NFC нужен владельцу бизнеса, чтобы записать ссылку клиентского приложения MAYA на метку.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -74,6 +79,10 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>

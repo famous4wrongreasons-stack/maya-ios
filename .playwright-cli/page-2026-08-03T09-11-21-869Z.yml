@@ -1,0 +1,27 @@
+- generic [ref=f1e2]:
+  - generic [ref=f1e32]:
+    - generic [ref=f1e33]:
+      - generic [ref=f1e34]:
+        - img "Ваш бизнес" [ref=f1e35]
+        - generic [ref=f1e36]:
+          - generic [ref=f1e37]: Ваш бизнес
+          - generic [ref=f1e38]: Ставрополь
+      - generic [ref=f1e39] [cursor=pointer]: М
+    - generic [ref=f1e40]:
+      - generic [ref=f1e41]: Ближайшее окно
+      - generic [ref=f1e42]: Свободные окна
+      - generic [ref=f1e43]: Онлайн-запись за минуту
+      - generic [ref=f1e44] [cursor=pointer]: Записаться
+    - generic [ref=f1e48]: Услуги
+    - generic [ref=f1e49]: Посмотреть услуги
+    - generic [ref=f1e61] [cursor=pointer]:
+      - generic [ref=f1e62]: Специалисты
+      - generic [ref=f1e63]: Выберите специалиста при записи
+    - generic [ref=f1e66]:
+      - generic [ref=f1e67] [cursor=pointer]: Кабинет
+      - generic [ref=f1e72] [cursor=pointer]: Контакты
+  - generic [ref=f1e81]:
+    - generic [ref=f1e82] [cursor=pointer]: Запись
+    - generic [ref=f1e88] [cursor=pointer]: Записи
+    - generic [ref=f1e94] [cursor=pointer]: Профиль
+  - generic [ref=f1e99] [cursor=pointer]: Сменить вход

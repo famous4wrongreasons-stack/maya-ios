@@ -1,0 +1,25 @@
+- generic [ref=f8e2]:
+  - generic [ref=f8e140]:
+    - generic [ref=f8e141]:
+      - generic [ref=f8e142]: Мастер
+      - generic [ref=f8e143]: ›
+      - generic [ref=f8e144]: Услуга
+      - generic [ref=f8e145]: ›
+      - generic [ref=f8e146]: Дата
+      - generic [ref=f8e147]: ›
+      - generic [ref=f8e148]: Время
+    - generic [ref=f8e149]:
+      - generic [ref=f8e150]: MAYA OS · Владелец
+      - heading "Клиенты" [level=2] [ref=f8e151]
+      - generic [ref=f8e152]:
+        - generic [ref=f8e153] [cursor=pointer]: Обзор
+        - generic [ref=f8e154] [cursor=pointer]: Календарь
+        - generic [ref=f8e155] [cursor=pointer]: Клиенты
+        - generic [ref=f8e156] [cursor=pointer]: Профиль
+      - generic [ref=f8e157]: Клиентов пока нет
+      - generic [ref=f8e158]: Открыть клиентскую версию
+  - generic [ref=f8e29]:
+    - generic [ref=f8e30] [cursor=pointer]: Кабинет
+    - generic [ref=f8e37] [cursor=pointer]: Чат
+    - generic [ref=f8e42] [cursor=pointer]: Финансы
+    - generic [ref=f8e45] [cursor=pointer]: Клиенты

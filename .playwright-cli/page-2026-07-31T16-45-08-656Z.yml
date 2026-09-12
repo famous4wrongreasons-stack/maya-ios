@@ -1,0 +1,20 @@
+- generic [ref=f8e2]:
+  - generic [ref=f8e95]:
+    - generic [ref=f8e106]:
+      - generic [ref=f8e107]: Maya
+      - generic [ref=f8e108]: Администратор · онлайн
+    - generic [ref=f8e112]:
+      - generic [ref=f8e121]: MAYA
+      - generic [ref=f8e122]: AI-администратор вашего бизнеса. Покажу ситуацию и подготовлю действие к вашему подтверждению.
+      - generic [ref=f8e123]:
+        - button "Что сегодня по бизнесу?" [ref=f8e124] [cursor=pointer]
+        - button "Покажи аналитику" [ref=f8e125] [cursor=pointer]
+        - button "Записи сегодня" [ref=f8e126] [cursor=pointer]
+    - generic [ref=f8e129]:
+      - textbox "Сообщение Maya…" [ref=f8e130]
+      - generic [ref=f8e131]: ↑
+  - generic [ref=f8e29]:
+    - generic [ref=f8e30] [cursor=pointer]: Кабинет
+    - generic [ref=f8e37] [cursor=pointer]: Чат
+    - generic [ref=f8e42] [cursor=pointer]: Финансы
+    - generic [ref=f8e45] [cursor=pointer]: Клиенты
