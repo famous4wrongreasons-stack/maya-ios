@@ -37,8 +37,19 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tg</string>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон нужен, чтобы вы могли голосом общаться с ассистентом MAYA и записывать голосовые сообщения в чате.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Локальная сеть нужна только для тестирования MAYA OS на вашем Mac.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Камера нужна, чтобы сделать фото или видео и прикрепить их в чат команды.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
