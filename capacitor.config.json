@@ -9,7 +9,6 @@
   },
   "ios": {
     "contentInset": "never",
-    "backgroundColor": "#000000",
     "scrollEnabled": true
   },
   "plugins": {
@@ -17,9 +16,9 @@
       "enabled": true
     },
     "SplashScreen": {
-      "launchShowDuration": 700,
-      "backgroundColor": "#000000",
-      "showSpinner": false
+      "backgroundColor": "#0A84FF",
+      "showSpinner": false,
+      "launchAutoHide": false
     },
     "StatusBar": {
       "style": "DARK",
